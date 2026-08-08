@@ -416,8 +416,13 @@ svg.donut{transform:rotate(-90deg);}
     <div class="analyzer-split">
       <div class="input-card">
         <div class="input-label">Enter Your Text</div>
-        <textarea id="ana-input" placeholder="Type or paste text here…" maxlength="3000"></textarea>
-        <div class="try-row">
+        <textarea id="ana-input" placeholder="Type or paste text here…" maxlength="3000" oninput="updateAnaCounter()"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:8px;">
+          <span id="min-word-warning" style="color:#ff5252;display:none;font-weight:600;">Minimum 3 characters required to analyze.</span>
+          <span id="max-word-warning" style="color:var(--yellow);display:none;font-weight:600;">Max limit (500 words) reached. <a href="#" onclick="showPage('batch',document.querySelector('[data-page=batch]'));return false;" style="color:var(--yellow);text-decoration:underline;">Switch to Bulk CSV / Word Batch Mode →</a></span>
+          <span id="ana-counter" style="margin-left:auto;">0 / 500 words · 0 / 3000 chars</span>
+        </div>
+        <div class="try-row" style="margin-top:12px;">
           <span class="try-label">Try:</span>
           <span class="try-pill" onclick="setTry('movie')"><span class="dot" style="background:#448aff;"></span>Movie review</span>
           <span class="try-pill" onclick="setTry('bad')"><span class="dot" style="background:#f44336;"></span>Bad product</span>
@@ -774,33 +779,89 @@ function setLang(l,btn){
   btn.classList.add('active');
 }
 
-function setTry(k){document.getElementById('ana-input').value=SAMPLES[k]||'';}
+function updateAnaCounter(){
+  const val = document.getElementById('ana-input').value;
+  const chars = val.length;
+  const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+  const counterEl = document.getElementById('ana-counter');
+  const minWarn = document.getElementById('min-word-warning');
+  const maxWarn = document.getElementById('max-word-warning');
+
+  if(counterEl) counterEl.textContent = `${words} / 500 words · ${chars} / 3000 chars`;
+
+  if(chars > 0 && chars < 3){
+    if(minWarn) minWarn.style.display = 'inline';
+  } else {
+    if(minWarn) minWarn.style.display = 'none';
+  }
+
+  if(words >= 500 || chars >= 3000){
+    if(maxWarn) maxWarn.style.display = 'inline';
+  } else {
+    if(maxWarn) maxWarn.style.display = 'none';
+  }
+}
+
+function setTry(k){
+  document.getElementById('ana-input').value = SAMPLES[k] || '';
+  updateAnaCounter();
+  analyzeText();
+}
 
 // ═══════════════════════════════════════════
 // ANALYZER
 // ═══════════════════════════════════════════
 async function analyzeText(){
-  const text=document.getElementById('ana-input').value.trim();
-  if(!text){toast('Please enter some text');return;}
-  const btn=document.getElementById('ana-btn');
-  btn.disabled=true;btn.textContent='Analyzing…';
+  const text = document.getElementById('ana-input').value.trim();
+  if(!text || text.length < 3){
+    toast('Please enter at least 3 characters to analyze sentiment.');
+    const minWarn = document.getElementById('min-word-warning');
+    if(minWarn) minWarn.style.display = 'inline';
+    return;
+  }
+
+  const words = text.split(/\s+/).length;
+  if(words > 500){
+    toast('Input exceeds 500 words limit. Switching to Word Batch Mode for large datasets!');
+    showPage('batch', document.querySelector('[data-page=batch]'));
+    return;
+  }
+
+  const btn = document.getElementById('ana-btn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing…';
   showResultLoading();
+
   try{
-    const res=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
-    const data=await res.json();
-    if(data.error&&!data.sentiment){showResultError(data.error);return;}
-    showResult(data,text);
-    addHistory(text,data.sentiment,data.scores,null);
-  }catch(e){showResultError('Connection error');}
-  finally{btn.disabled=false;btn.textContent='Analyze →';}
+    const res = await fetch('/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    if(data.error && !data.sentiment){
+      showResultError(data.error);
+      return;
+    }
+    showResult(data, text);
+    addHistory(text, data.sentiment, data.scores, null);
+  } catch(e){
+    showResultError('Connection error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Analyze →';
+  }
 }
 
 function clearAnalyzer(){
-  document.getElementById('ana-input').value='';
-  document.getElementById('result-empty').style.display='flex';
-  document.getElementById('result-content').style.display='none';
-  document.getElementById('result-card').style.alignItems='center';
-  document.getElementById('result-card').style.justifyContent='center';
+  document.getElementById('ana-input').value = '';
+  updateAnaCounter();
+  const hlSec = document.getElementById('word-hl-section');
+  if(hlSec) hlSec.style.display = 'none';
+  document.getElementById('result-empty').style.display = 'flex';
+  document.getElementById('result-content').style.display = 'none';
+  document.getElementById('result-card').style.alignItems = 'center';
+  document.getElementById('result-card').style.justifyContent = 'center';
 }
 
 function showResultLoading(){
