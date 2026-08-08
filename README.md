@@ -165,4 +165,4 @@ python error_analysis.py
 
 ## Project Classification & Citation
 
-Developed as a **Final Year Major Project** in Computer Science & Engineering focusing on dual-language code-mixed NLP systems.
+Developed as a **Final Year Major Project in Artificial Intelligence and Data Science (AI & DS)** focusing on dual-language code-mixed NLP systems.
