@@ -163,6 +163,6 @@ python error_analysis.py
 
 ---
 
-## License & Academic Citation
+## Project Classification & Citation
 
-Developed as an academic final-year computer science research project on dual-language code-mixed NLP systems.
+Developed as a **Final Year Major Project** in Computer Science & Engineering focusing on dual-language code-mixed NLP systems.
