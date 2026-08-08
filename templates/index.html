@@ -406,12 +406,12 @@ svg.donut{transform:rotate(-90deg);}
 
     <!-- ═══ PROMINENT MODE SWITCHER BAR ═══ -->
     <div class="mode-switcher-bar">
-      <span class="mode-title-tag">⚡ Choose Mode:</span>
-      <button class="mode-nav-btn active" id="mode-btn-single" onclick="showPage('analyzer',document.querySelector('[data-page=analyzer]'))">🎯 Single Text</button>
-      <button class="mode-nav-btn" id="mode-btn-url" onclick="showPage('url',document.querySelector('[data-page=url]'))">🌐 Webpage Scraper</button>
-      <button class="mode-nav-btn" id="mode-btn-file" onclick="showPage('batch',document.querySelector('[data-page=batch]'))">📋 Bulk CSV / File</button>
-      <button class="mode-nav-btn" id="mode-btn-compare" onclick="showPage('compare',document.querySelector('[data-page=compare]'))">⚖️ Compare Webpages / Texts</button>
-      <button class="mode-nav-btn" id="mode-btn-api" onclick="showPage('apihub',document.querySelector('[data-page=apihub]'))">🔌 Developer API</button>
+      <span class="mode-title-tag">Choose Mode:</span>
+      <button class="mode-nav-btn active" id="mode-btn-single" onclick="showPage('analyzer')">Single Text</button>
+      <button class="mode-nav-btn" id="mode-btn-url" onclick="showPage('url')">Webpage Scraper</button>
+      <button class="mode-nav-btn" id="mode-btn-file" onclick="showPage('batch')">Bulk CSV / File</button>
+      <button class="mode-nav-btn" id="mode-btn-compare" onclick="showPage('compare')">Compare Webpages / Texts</button>
+      <button class="mode-nav-btn" id="mode-btn-api" onclick="showPage('apihub')">Developer API</button>
     </div>
     <div class="analyzer-split">
       <div class="input-card">
@@ -419,7 +419,7 @@ svg.donut{transform:rotate(-90deg);}
         <textarea id="ana-input" placeholder="Type or paste text here…" maxlength="3000" oninput="updateAnaCounter()"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:8px;">
           <span id="min-word-warning" style="color:#ff5252;display:none;font-weight:600;">Minimum 3 characters required to analyze.</span>
-          <span id="max-word-warning" style="color:var(--yellow);display:none;font-weight:600;">Max limit (500 words) reached. <a href="#" onclick="showPage('batch',document.querySelector('[data-page=batch]'));return false;" style="color:var(--yellow);text-decoration:underline;">Switch to Bulk CSV / Word Batch Mode →</a></span>
+          <span id="max-word-warning" style="color:var(--yellow);display:none;font-weight:600;">Max limit (500 words) reached. <a href="#" onclick="showPage('batch');return false;" style="color:var(--yellow);text-decoration:underline;">Switch to Bulk CSV / Word Batch Mode →</a></span>
           <span id="ana-counter" style="margin-left:auto;">0 / 500 words · 0 / 3000 chars</span>
         </div>
         <div class="try-row" style="margin-top:12px;">
@@ -753,12 +753,34 @@ const SAMPLES = {
 function showPage(page, btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  btn.classList.add('active');
+  document.querySelectorAll('.mode-nav-btn').forEach(b=>b.classList.remove('active'));
+  
+  const targetPage = document.getElementById('page-'+page);
+  if(targetPage) targetPage.classList.add('active');
+  
+  const sidebarBtn = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if(sidebarBtn) sidebarBtn.classList.add('active');
+  
+  const modeBtnMap = {
+    'analyzer': 'mode-btn-single',
+    'url': 'mode-btn-url',
+    'batch': 'mode-btn-file',
+    'compare': 'mode-btn-compare',
+    'apihub': 'mode-btn-api'
+  };
+  const modeBtn = document.getElementById(modeBtnMap[page]);
+  if(modeBtn) modeBtn.classList.add('active');
+  
+  if(btn && btn.classList) {
+    btn.classList.add('active');
+  }
+  
   if(page==='dashboard') renderDashboard();
   // close mobile sidebar
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('show');
+  const sidebar = document.getElementById('sidebar');
+  if(sidebar) sidebar.classList.remove('open');
+  const overlay = document.getElementById('sidebar-overlay');
+  if(overlay) overlay.classList.remove('show');
 }
 
 function toggleSidebar(){
@@ -823,7 +845,7 @@ async function analyzeText(){
   const words = text.split(/\s+/).length;
   if(words > 500){
     toast('Input exceeds 500 words limit. Switching to Word Batch Mode for large datasets!');
-    showPage('batch', document.querySelector('[data-page=batch]'));
+    showPage('batch');
     return;
   }
 
