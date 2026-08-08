@@ -12,7 +12,7 @@ import urllib.parse
 from collections import defaultdict
 from functools import wraps
 
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, jsonify, render_template, Response, redirect
 from flask_cors import CORS
 from nltk.sentiment import SentimentIntensityAnalyzer
 import numpy as np
@@ -990,6 +990,12 @@ def api_word_sentiment():
     except Exception as e:
         logger.error(f"/api/word-sentiment error: {e}")
         return jsonify({"error": str(e)}), 500
+
+@app.errorhandler(404)
+def page_not_found(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Endpoint not found"}), 404
+    return redirect("/app")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
