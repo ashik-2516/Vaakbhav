@@ -1526,46 +1526,6 @@ async function analyzeUrl(){
 
       <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <span style="font-size:12px;color:var(--muted);font-weight:600;">Detected Languages:</span>
-        <span class="pill" style="font-size:11px;background:#1a1a1a;color:var(--yellow);border:1px solid var(--border);">Hinglish (${langs.Hinglish||0})</span>
-        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#00e676;border:1px solid var(--border);">English (${langs.English||0})</span>
-        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#448aff;border:1px solid var(--border);">Hindi (${langs.Hindi||0})</span>
-        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#ab47bc;border:1px solid var(--border);">Mixed (${langs.Mixed||0})</span>
-      </div>
-    </div>
-
-    <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:14px;">Extracted Review Blocks & Language Detection</h3>
-    <div style="display:flex;flex-direction:column;gap:12px;">`;
-
-    (data.results || []).slice(0, 30).forEach((r, idx) => {
-      const s = r.sentiment || 'Neutral';
-      const langBadge = r.language ? (r.language.language || r.language.badge || 'English') : 'English';
-      html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:12px;color:var(--muted);">Review #${idx+1}</span>
-            <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#1a1a1a;color:#ccc;border:1px solid #333;">${langBadge}</span>
-          </div>
-          <span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:${colMap[s]}22;color:${colMap[s]};border:1px solid ${colMap[s]}44;">
-            ${s} (${r.confidence}%)
-          </span>
-        </div>`-muted);">Total Reviews</div>
-        </div>
-        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:22px;font-weight:900;color:#00e676;">${st.positive||0} (${st.positive_pct||0}%)</div>
-          <div style="font-size:11px;color:var(--muted);">Positive</div>
-        </div>
-        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:22px;font-weight:900;color:#448aff;">${st.neutral||0} (${st.neutral_pct||0}%)</div>
-          <div style="font-size:11px;color:var(--muted);">Neutral</div>
-        </div>
-        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
-          <div style="font-size:22px;font-weight:900;color:#ff5252;">${st.negative||0} (${st.negative_pct||0}%)</div>
-          <div style="font-size:11px;color:var(--muted);">Negative</div>
-        </div>
-      </div>
-
-      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="font-size:12px;color:var(--muted);font-weight:600;">Detected Languages:</span>
         <span class="pill" style="font-size:11px;background:#1a1a1a;color:var(--yellow);border:1px solid var(--border);">🔀 Hinglish (${langs.Hinglish||0})</span>
         <span class="pill" style="font-size:11px;background:#1a1a1a;color:#00e676;border:1px solid var(--border);">🇬🇧 English (${langs.English||0})</span>
         <span class="pill" style="font-size:11px;background:#1a1a1a;color:#448aff;border:1px solid var(--border);">🇮🇳 Hindi (${langs.Hindi||0})</span>
@@ -1586,7 +1546,7 @@ async function analyzeUrl(){
             <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#1a1a1a;color:#ccc;border:1px solid #333;">${langBadge}</span>
           </div>
           <span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:${colMap[s]}22;color:${colMap[s]};border:1px solid ${colMap[s]}44;">
-            ${emoMap[s]} ${s} (${r.confidence}%)
+            ${s} (${r.confidence}%)
           </span>
         </div>
         <div style="font-size:14px;color:#e0e0e0;line-height:1.5;">${escHtml(r.text || r.sentence || '')}</div>
