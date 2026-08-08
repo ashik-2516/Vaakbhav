@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VaakBhav — Sentiment Analyzer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --yellow:#F5C518;
+  --bg:#0d0d0d;
+  --sidebar:#111;
+  --card:#1a1a1a;
+  --card2:#1e1e1e;
+  --border:#252525;
+  --text:#fff;
+  --muted:#666;
+  --muted2:#888;
+  --green:#4caf50;
+  --green-light:#00e676;
+  --red:#f44336;
+  --blue:#448aff;
+  --font-base:17px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:var(--font-base);}
+
+/* LAYOUT */
+.layout{display:flex;height:100vh;overflow:hidden;}
+
+/* SIDEBAR */
+aside{width:168px;min-width:168px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow:hidden;}
+.aside-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 16px;border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;}
+.logo-box{width:34px;height:34px;background:var(--yellow);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000;flex-shrink:0;}
+.aside-logo-text{display:flex;flex-direction:column;}
+.aside-logo-text .name{font-size:14px;font-weight:700;color:#fff;line-height:1;}
+.aside-logo-text .sub{font-size:10px;color:var(--muted2);margin-top:2px;}
+nav.sidenav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#a0a0a0;transition:all .2s ease;border:none;background:none;width:100%;text-align:left;font-family:inherit;}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:#fff;}
+.nav-item.active{background:var(--yellow);color:#000;font-weight:700;box-shadow:0 4px 12px rgba(245,197,24,0.3);}
+.nav-item .nav-svg{stroke:#888888;transition:stroke .2s ease;flex-shrink:0;}
+.nav-item:hover .nav-svg{stroke:#ffffff;}
+.nav-item.active .nav-svg{stroke:#000000;}
+.aside-bottom{padding:12px 8px;border-top:1px solid var(--border);}
+.text-size-row{display:flex;align-items:center;gap:6px;margin-bottom:12px;}
+.ts-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.ts-btn{background:#222;border:1px solid var(--border);color:#ccc;width:26px;height:26px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+.ts-btn:hover{background:#333;}
+.model-badge{background:#1a1a1a;border:1px solid var(--border);border-radius:6px;padding:8px 10px;}
+.model-badge .dot{width:8px;height:8px;background:#00e676;border-radius:50%;display:inline-block;margin-right:6px;}
+.model-badge .mname{font-size:12px;font-weight:600;color:#ccc;}
+.model-badge .mtype{font-size:10px;color:var(--muted);display:block;margin-top:2px;}
+
+/* MAIN */
+main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+
+/* PAGES */
+.page{display:none;padding:40px 40px;animation:fadeIn .2s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.page-title{font-size:32px;font-weight:900;margin-bottom:6px;font-style:italic;}
+.page-sub{font-size:14px;color:var(--muted2);margin-bottom:28px;}
+
+/* LANG TABS */
+.lang-tabs{display:flex;gap:2px;background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:3px;width:fit-content;margin-bottom:28px;}
+.lang-tab{padding:7px 18px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;color:var(--muted2);transition:all .15s;border:none;background:none;font-family:inherit;}
+.lang-tab.active{background:var(--yellow);color:#000;}
+
+/* ANALYZER SPLIT */
+.analyzer-split{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+
+/* INPUT CARD */
+.input-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.input-label{padding:16px 20px 0;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+textarea{width:100%;background:transparent;border:none;outline:none;resize:vertical;min-height:140px;padding:14px 20px 10px;font-size:15px;color:#e0e0e0;font-family:inherit;line-height:1.6;}
+.try-row{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-wrap:wrap;}
+.try-label{font-size:12px;color:var(--muted);margin-right:2px;}
+.try-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:#222;border:1px solid var(--border);font-size:12px;color:#bbb;cursor:pointer;transition:all .15s;}
+.try-pill:hover{border-color:#444;color:#fff;}
+.try-pill .dot{width:7px;height:7px;border-radius:50%;}
+.input-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid var(--border);}
+.btn-clear{background:transparent;border:1px solid var(--border);color:#ccc;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-clear:hover{background:#222;}
+.btn-analyze{background:var(--yellow);color:#000;border:none;padding:9px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.btn-analyze:hover{background:#e6b800;}
+.btn-analyze:disabled{opacity:.5;cursor:not-allowed;}
+
+/* RESULT CARD */
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:14px;min-height:260px;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.result-empty{text-align:center;color:var(--muted);}
+.result-empty .icon{font-size:36px;margin-bottom:12px;opacity:.4;}
+.result-empty p{font-size:14px;}
+.result-content{width:100%;padding:28px;}
+.result-sentiment-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:999px;font-size:15px;font-weight:700;margin-bottom:20px;}
+.result-sentiment-badge.Positive{background:rgba(76,175,80,.15);color:#4caf50;border:1px solid rgba(76,175,80,.3);}
+.result-sentiment-badge.Negative{background:rgba(244,67,54,.15);color:#f44336;border:1px solid rgba(244,67,54,.3);}
+.result-sentiment-badge.Neutral{background:rgba(68,138,255,.15);color:#448aff;border:1px solid rgba(68,138,255,.3);}
+.result-conf-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+.conf-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.conf-bar-row .name{width:68px;font-size:13px;color:#ccc;}
+.bar-track{flex:1;height:8px;background:#252525;border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.conf-bar-row .pct{width:36px;text-align:right;font-size:13px;font-weight:600;}
+.vader-row{display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);}
+.vader-val{font-weight:700;color:#ccc;}
+.hinglish-row{margin-top:12px;}
+.hinglish-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#252525;border-radius:999px;font-size:12px;color:#bbb;margin:2px;}
+.spinner{width:32px;height:32px;border:3px solid #333;border-top-color:var(--yellow);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* BATCH PAGE */
+.batch-mode-tabs{display:flex;gap:8px;margin-bottom:24px;}
+.bmode-tab{padding:8px 18px;border-radius:8px;border:1px solid var(--border);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted2);background:transparent;transition:all .15s;font-family:inherit;}
+.bmode-tab.active{background:var(--yellow);color:#000;border-color:var(--yellow);}
+.batch-panel{display:none;}
+.batch-panel.active{display:block;}
+.batch-textarea{width:100%;background:var(--card);border:1px solid var(--border);border-radius:12px;color:#e0e0e0;font-size:14px;padding:16px;min-height:160px;resize:vertical;outline:none;font-family:inherit;line-height:1.6;}
+.batch-textarea:focus{border-color:#333;}
+.batch-action-row{display:flex;justify-content:flex-end;margin-top:12px;}
+.upload-zone{background:var(--card);border:2px dashed var(--border);border-radius:12px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--yellow);background:rgba(245,197,24,.04);}
+.upload-zone .icon{font-size:36px;margin-bottom:12px;}
+.upload-zone .title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.upload-zone .sub{font-size:13px;color:var(--muted);}
+.upload-zone input{display:none;}
+.batch-results{margin-top:24px;}
+.batch-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.bstat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.bstat .num{font-size:28px;font-weight:900;}
+.bstat .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+.bstat.total .num{color:#fff;}
+.bstat.pos .num{color:var(--green-light);}
+.bstat.neg .num{color:#f44336;}
+.bstat.neu .num{color:var(--blue);}
+.result-table{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.result-table-header{display:grid;grid-template-columns:1fr 100px 70px;gap:12px;padding:12px 16px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);}
+.result-row{display:grid;grid-template-columns:1fr 100px 70px;gap:12px;padding:12px 16px;border-bottom:1px solid #1e1e1e;align-items:center;font-size:13px;}
+.result-row:last-child{border-bottom:none;}
+.result-row:hover{background:rgba(255,255,255,.02);}
+.sent-badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;}
+.sent-badge.Positive{background:rgba(76,175,80,.15);color:#4caf50;}
+.sent-badge.Negative{background:rgba(244,67,54,.15);color:#f44336;}
+.sent-badge.Neutral{background:rgba(68,138,255,.15);color:#448aff;}
+.download-btn{background:var(--card);border:1px solid var(--border);color:#ccc;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px;transition:all .15s;}
+.download-btn:hover{background:#222;}
+
+/* DASHBOARD */
+.dash-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.dash-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.dash-stat .ds-icon{font-size:20px;margin-bottom:12px;color:var(--muted);}
+.dash-stat .ds-num{font-size:40px;font-weight:900;line-height:1;}
+.dash-stat .ds-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:8px;}
+.dash-stat.total .ds-num{color:#fff;}
+.dash-stat.pos .ds-num{color:var(--green-light);}
+.dash-stat.neg .ds-num{color:#f44336;}
+.dash-stat.neu .ds-num{color:var(--blue);}
+.dash-charts{display:grid;grid-template-columns:1fr 400px;gap:16px;margin-bottom:24px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.chart-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;}
+.chart-legend{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:13px;}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.bar-chart{display:flex;align-items:flex-end;gap:20px;height:160px;padding:0 8px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:6px;}
+.bar-block{width:100%;border-radius:6px 6px 0 0;transition:height .5s ease;min-width:60px;}
+.bar-label{font-size:12px;color:var(--muted);}
+.donut-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;}
+svg.donut{transform:rotate(-90deg);}
+.donut-legend{display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;}
+
+/* HISTORY TABLE */
+.history-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.history-header-row{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);}
+.history-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+.clear-hist-btn{background:transparent;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;}
+.clear-hist-btn:hover{color:#fff;}
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #1a1a1a;font-size:13px;}
+.history-item:last-child{border-bottom:none;}
+.history-item:hover{background:rgba(255,255,255,.02);}
+.hist-dot{width:8px;height:8px;border-radius:50%;margin-right:12px;flex-shrink:0;}
+.hist-text{flex:1;color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:600px;}
+.hist-right{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.hist-badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;}
+.hist-badge.Positive{background:rgba(76,175,80,.15);color:#4caf50;}
+.hist-badge.Negative{background:rgba(244,67,54,.15);color:#f44336;}
+.hist-badge.Neutral{background:rgba(68,138,255,.15);color:#448aff;}
+.hist-pct{font-size:13px;color:var(--muted);}
+.empty-history{padding:48px;text-align:center;color:var(--muted);font-size:14px;}
+
+/* Dashboard top-right */
+.dash-top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+
+/* MODE SWITCHER BAR */
+.mode-switcher-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  background: #141414;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.mode-title-tag {
+  font-size: 11px;
+  color: var(--yellow);
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.mode-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: #1c1c1c;
+  color: #cccccc;
+  border: 1px solid #2e2e2e;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  text-decoration: none;
+}
+.mode-nav-btn:hover {
+  background: #282828;
+  color: #ffffff;
+  border-color: #555555;
+}
+.mode-nav-btn.active {
+  background: var(--yellow);
+  color: #000000;
+  border-color: var(--yellow);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(245, 197, 24, 0.3);
+}
+
+/* ABOUT */
+.about-section{margin-bottom:36px;}
+.about-section h3{font-size:17px;font-weight:700;margin-bottom:14px;}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:10px;}
+.faq-q{font-size:15px;font-weight:600;margin-bottom:8px;}
+.faq-a{font-size:14px;color:var(--muted2);line-height:1.6;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.about-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+.about-card .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.about-card .val{font-size:15px;font-weight:600;}
+
+
+/* ── MOBILE HAMBURGER ─────────────────────── */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;color:#fff;font-size:22px;position:fixed;top:12px;left:12px;z-index:200;}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;}
+.sidebar-overlay.show{display:block;}
+@media(max-width:700px){
+  .hamburger{display:block;}
+  aside{position:fixed;top:0;left:-200px;height:100%;z-index:160;transition:left .25s ease;}
+  aside.open{left:0;}
+  main{padding-top:0;}
+  .page{padding:56px 16px 24px;}
+  .analyzer-split{grid-template-columns:1fr;}
+  .dash-charts{grid-template-columns:1fr;}
+  .batch-stats-grid{grid-template-columns:repeat(2,1fr);}
+  .dash-stats-grid{grid-template-columns:repeat(2,1fr);}
+  .about-grid{grid-template-columns:1fr;}
+  .page-title{font-size:24px;}
+}
+
+/* ── WORD HIGHLIGHT COLOURS ──────────────────*/
+.w-pos{background:rgba(76,175,80,.22);border-radius:3px;padding:0 2px;}
+.w-neg{background:rgba(244,67,54,.22);border-radius:3px;padding:0 2px;}
+.w-neu{opacity:.75;}
+.word-highlight-row{line-height:2;font-size:14px;color:#ddd;margin-top:12px;padding:12px 16px;background:#111;border-radius:8px;border:1px solid var(--border);}
+.wh-legend{display:flex;gap:12px;font-size:11px;color:var(--muted);margin-bottom:6px;}
+.wh-swatch{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;}
+
+/* ── SHARE / COPY BUTTON ─────────────────────*/
+.share-row{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.btn-share{background:#222;border:1px solid var(--border);color:#ccc;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px;}
+.btn-share:hover{background:#2a2a2a;color:#fff;}
+
+/* ── COMPARE PAGE ────────────────────────────*/
+.compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px;}
+@media(max-width:700px){.compare-grid{grid-template-columns:1fr;}}
+.compare-input-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.compare-input-card textarea{min-height:90px;font-size:14px;}
+.compare-result-badge{padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;display:inline-block;margin-top:8px;}
+
+/* ── FAQ ACCORDION ───────────────────────────*/
+.faq-item{cursor:pointer;user-select:none;}
+.faq-item .faq-a{display:none;padding-top:8px;}
+.faq-item.open .faq-a{display:block;}
+.faq-q::after{content:' ＋';float:right;color:var(--muted);}
+.faq-item.open .faq-q::after{content:' −';}
+
+/* ── KEYBOARD HINT ───────────────────────────*/
+.kb-hint{font-size:11px;color:var(--muted);margin-left:4px;}
+
+/* ── PROGRESS BAR (batch) ────────────────────*/
+.progress-wrap{background:#1a1a1a;border-radius:4px;height:4px;margin:8px 0;overflow:hidden;display:none;}
+.progress-wrap.show{display:block;}
+.progress-fill{height:100%;background:var(--yellow);border-radius:4px;transition:width .3s ease;width:0%;}
+
+/* ── HISTORY TIMESTAMP ───────────────────────*/
+.hist-time{font-size:11px;color:var(--muted);min-width:44px;text-align:right;}
+
+/* ── DONUT CENTRE LABEL ──────────────────────*/
+.donut-center-text{font-size:26px;font-weight:900;fill:#fff;text-anchor:middle;dominant-baseline:middle;}
+.donut-center-sub{font-size:10px;fill:var(--muted);text-anchor:middle;dominant-baseline:middle;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#333;border-radius:2px;}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:999;display:none;}
+.loading-overlay.show{display:flex;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#222;border:1px solid var(--border);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* File row indicator */
+.file-rows-info{background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.2);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--yellow);}
+</style>
+</head>
+<body>
+<div class="layout">
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <a class="aside-logo" href="/">
+    <div class="logo-box">वाB</div>
+    <div class="aside-logo-text">
+      <span class="name">VaakBhav</span>
+      <span class="sub">Hinglish Sentiment AI</span>
+    </div>
+  </a>
+  <nav class="sidenav">
+    <button class="nav-item active" data-page="analyzer" onclick="showPage('analyzer',this)">
+      <svg class="nav-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="3"/></svg>
+      Analyzer
+    </button>
+    <button class="nav-item" data-page="batch" onclick="showPage('batch',this)">
+      <svg class="nav-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Word Batch
+    </button>
+    <button class="nav-item" data-page="dashboard" onclick="showPage('dashboard',this)">
+      <svg class="nav-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-page="compare" onclick="showPage('compare',this)">
+      <svg class="nav-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      Compare
+    </button>
+    <button class="nav-item" data-page="url" onclick="showPage('url',this)">
+      <svg class="nav-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Webpage Scraper
+    </button>
+    <button class="nav-item" data-page="apihub" onclick="showPage('apihub',this)">
+      <svg class="nav-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Developer API
+    </button>
+    <button class="nav-item" data-page="about" onclick="showPage('about',this)">
+      <svg class="nav-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      About
+    </button>
+  </nav>
+  <div class="aside-bottom">
+    <div class="text-size-row">
+      <span class="ts-label">Text Size</span>
+      <button class="ts-btn" onclick="adjustFont(-1)">A-</button>
+      <button class="ts-btn" onclick="adjustFont(0)">A</button>
+      <button class="ts-btn" onclick="adjustFont(1)">A+</button>
+    </div>
+    <div class="model-badge">
+      <span class="dot"></span>
+      <span class="mname" id="model-status-label">Loading…</span>
+      <span class="mtype" id="model-status-sub">Checking…</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="main-content">
+
+  <!-- ═══ ANALYZER PAGE ═══ -->
+  <div class="page active" id="page-analyzer">
+    <h1 class="page-title">Sentiment Analyzer</h1>
+    <p class="page-sub">Detect emotions in Hindi, English &amp; Hinglish text</p>
+    <div class="lang-tabs">
+      <button class="lang-tab active" onclick="setLang('हिंदी',this)">हिंदी</button>
+      <button class="lang-tab" onclick="setLang('English',this)">English</button>
+      <button class="lang-tab" onclick="setLang('Hinglish',this)">Hinglish</button>
+    </div>
+
+    <!-- ═══ PROMINENT MODE SWITCHER BAR ═══ -->
+    <div class="mode-switcher-bar">
+      <span class="mode-title-tag">⚡ Choose Mode:</span>
+      <button class="mode-nav-btn active" id="mode-btn-single" onclick="showPage('analyzer',document.querySelector('[data-page=analyzer]'))">🎯 Single Text</button>
+      <button class="mode-nav-btn" id="mode-btn-url" onclick="showPage('url',document.querySelector('[data-page=url]'))">🌐 Webpage Scraper</button>
+      <button class="mode-nav-btn" id="mode-btn-file" onclick="showPage('batch',document.querySelector('[data-page=batch]'))">📋 Bulk CSV / File</button>
+      <button class="mode-nav-btn" id="mode-btn-compare" onclick="showPage('compare',document.querySelector('[data-page=compare]'))">⚖️ Compare Webpages / Texts</button>
+      <button class="mode-nav-btn" id="mode-btn-api" onclick="showPage('apihub',document.querySelector('[data-page=apihub]'))">🔌 Developer API</button>
+    </div>
+    <div class="analyzer-split">
+      <div class="input-card">
+        <div class="input-label">Enter Your Text</div>
+        <textarea id="ana-input" placeholder="Type or paste text here…" maxlength="3000"></textarea>
+        <div class="try-row">
+          <span class="try-label">Try:</span>
+          <span class="try-pill" onclick="setTry('movie')"><span class="dot" style="background:#448aff;"></span>Movie review</span>
+          <span class="try-pill" onclick="setTry('bad')"><span class="dot" style="background:#f44336;"></span>Bad product</span>
+          <span class="try-pill" onclick="setTry('neutral')"><span class="dot" style="background:#f5c518;"></span>Neutral</span>
+          <span class="try-pill" onclick="setTry('excited')"><span class="dot" style="background:#ff9800;"></span>Excited</span>
+        </div>
+        <div class="input-actions">
+          <button class="btn-clear" onclick="clearAnalyzer()">Clear</button>
+          <button class="btn-analyze" id="ana-btn" onclick="analyzeText()">Analyze →<span class="kb-hint">Ctrl+↵</span></button>
+        </div>
+      </div>
+      <div id="word-hl-section" style="display:none;">
+        <div class="wh-legend">
+          <span><span class="wh-swatch" style="background:rgba(76,175,80,.4);"></span>Positive</span>
+          <span><span class="wh-swatch" style="background:rgba(244,67,54,.4);"></span>Negative</span>
+          <span><span class="wh-swatch" style="opacity:.6;background:#555;"></span>Neutral</span>
+        </div>
+        <div class="word-highlight-row" id="word-hl-output"></div>
+      </div>
+      <div class="result-card" id="result-card">
+        <div class="result-empty" id="result-empty">
+          <div class="icon">🔍</div>
+          <p>Your results will appear here</p>
+        </div>
+        <div class="result-content" id="result-content" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BATCH PAGE ═══ -->
+  <div class="page" id="page-batch">
+    <h1 class="page-title">Batch &amp; Upload</h1>
+    <p class="page-sub">Analyze multiple texts or upload a file</p>
+    <div class="batch-mode-tabs">
+      <button class="bmode-tab active" onclick="setBatchMode('paragraph',this)">Paragraph</button>
+      <button class="bmode-tab" onclick="setBatchMode('list',this)">Text List</button>
+      <button class="bmode-tab" onclick="setBatchMode('file',this)">File Upload</button>
+    </div>
+
+    <!-- Paragraph mode -->
+    <div class="batch-panel active" id="bpanel-paragraph">
+      <textarea class="batch-textarea" id="batch-para-input" placeholder="Paste a paragraph here — each sentence will be analyzed separately…"></textarea>
+      <div class="batch-action-row">
+        <button class="btn-analyze" onclick="runBatchParagraph()">Analyze Paragraph →</button>
+      </div>
+      <div id="batch-para-results"></div>
+    </div>
+
+    <!-- List mode -->
+    <div class="batch-panel" id="bpanel-list">
+      <textarea class="batch-textarea" id="batch-list-input" placeholder="One text per line…&#10;Yeh movie bahut acchi thi!&#10;Bakwas hai bilkul&#10;Theek thak hai"></textarea>
+      <div class="batch-action-row">
+        <button class="btn-analyze" onclick="runBatchList()">Analyze List →</button>
+      </div>
+      <div id="batch-list-results"></div>
+    </div>
+
+    <!-- File upload mode -->
+    <div class="batch-panel" id="bpanel-file">
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleDrop(event)">
+        <div class="icon">📁</div>
+        <div class="title">Click or drag a file here</div>
+        <div class="sub">.csv or .txt — up to 1,000,000 rows / 200 MB</div>
+        <input type="file" id="file-input" accept=".csv,.txt" onchange="handleFileSelect(event)"/>
+      </div>
+      <div id="batch-file-results"></div>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD PAGE ═══ -->
+  <div class="page" id="page-dashboard">
+    <div class="dash-top-row">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-sub">Analytics across all your predictions</p>
+      </div>
+      <button class="clear-hist-btn" onclick="clearHistory()" style="margin-top:44px;">Clear history</button>
+    </div>
+    <div class="dash-stats-grid">
+      <div class="dash-stat total"><div class="ds-icon">Σ</div><div class="ds-num" id="ds-total">0</div><div class="ds-label">Total Analyzed</div></div>
+      <div class="dash-stat pos"><div class="ds-icon">↑</div><div class="ds-num" id="ds-pos">0</div><div class="ds-label">Positive</div></div>
+      <div class="dash-stat neg"><div class="ds-icon">↓</div><div class="ds-num" id="ds-neg">0</div><div class="ds-label">Negative</div></div>
+      <div class="dash-stat neu"><div class="ds-icon">→</div><div class="ds-num" id="ds-neu">0</div><div class="ds-label">Neutral</div></div>
+    </div>
+    <div class="dash-charts">
+      <div class="chart-card">
+        <div class="chart-title">Sentiment Distribution</div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#4caf50;"></div>Positive (<span id="leg-pos">0</span>)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f44336;"></div>Negative (<span id="leg-neg">0</span>)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#448aff;"></div>Neutral (<span id="leg-neu">0</span>)</div>
+        </div>
+        <div class="bar-chart" id="bar-chart">
+          <div class="bar-col"><div class="bar-block" id="bar-pos" style="background:#4caf50;height:0px;"></div><div class="bar-label">Positive</div></div>
+          <div class="bar-col"><div class="bar-block" id="bar-neg" style="background:#f44336;height:0px;"></div><div class="bar-label">Negative</div></div>
+          <div class="bar-col"><div class="bar-block" id="bar-neu" style="background:#448aff;height:0px;"></div><div class="bar-label">Neutral</div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Proportion</div>
+        <div class="donut-wrap">
+          <svg class="donut" width="160" height="160" viewBox="0 0 160 160">
+            <circle cx="80" cy="80" r="60" fill="none" stroke="#1a1a1a" stroke-width="28"/>
+            <circle id="donut-pos" cx="80" cy="80" r="60" fill="none" stroke="#4caf50" stroke-width="28" stroke-dasharray="0 377"/>
+            <circle id="donut-neg" cx="80" cy="80" r="60" fill="none" stroke="#f44336" stroke-width="28" stroke-dasharray="0 377" stroke-dashoffset="0"/>
+            <circle id="donut-neu" cx="80" cy="80" r="60" fill="none" stroke="#448aff" stroke-width="28" stroke-dasharray="0 377" stroke-dashoffset="0"/>
+            <text class="donut-center-text" x="80" y="76" id="donut-center-pct">0%</text>
+            <text class="donut-center-sub" x="80" y="92" id="donut-center-lbl">positive</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#4caf50;"></div>Positive</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f44336;"></div>Negative</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#448aff;"></div>Neutral</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="history-card">
+      <div class="history-header-row">
+        <div class="history-title">Prediction History</div>
+      </div>
+      <div id="history-list"><div class="empty-history">No predictions yet. Start analyzing!</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ COMPARE PAGE ═══ -->
+  <div class="page" id="page-compare">
+    <h1 class="page-title">Multi-Source Sentiment Comparison Engine</h1>
+    <p class="page-sub">Compare customer reviews & sentiments side-by-side across multiple websites, products, or custom texts</p>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="bmode-tab active" id="tab-comp-url" onclick="setCompareSubMode('url',this)">Compare Webpages / E-Commerce Stores</button>
+      <button class="bmode-tab" id="tab-comp-text" onclick="setCompareSubMode('text',this)">Compare Custom Texts</button>
+    </div>
+
+    <!-- WEBPAGE COMPARISON MODE -->
+    <div id="comp-mode-url" class="compare-mode-panel active">
+      <div class="card" style="padding:24px;">
+        <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:12px;font-weight:600;">Enter 2 or more E-Commerce / Webpage Review URLs to compare side-by-side:</label>
+        <div id="compare-url-inputs" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="url-compare-card" style="background:#141414;border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;color:var(--yellow);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Website #1 (e.g. Amazon URL)</div>
+            <input type="text" class="compare-url-field" placeholder="https://www.amazon.in/dp/B0FQG8MVMC" style="width:100%;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:#fff;font-family:inherit;font-size:14px;outline:none;" value="https://www.amazon.in/dp/B0FQG8MVMC"/>
+          </div>
+          <div class="url-compare-card" style="background:#141414;border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="font-size:11px;color:var(--yellow);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Website #2 (e.g. Flipkart / Blog URL)</div>
+            <input type="text" class="compare-url-field" placeholder="https://www.flipkart.com/apple-iphone-15/p/itm6ac2093e9a7e4" style="width:100%;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:#fff;font-family:inherit;font-size:14px;outline:none;" value="https://www.flipkart.com/apple-iphone-15/p/itm6ac2093e9a7e4"/>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-analyze" onclick="runWebpageCompare()">Compare Webpage Reviews →</button>
+          <button class="btn-clear" onclick="addUrlCompareInput()">+ Add Website URL</button>
+          <button class="btn-clear" onclick="resetUrlCompare()">Reset URLs</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:16px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--muted);font-weight:600;">Presets:</span>
+          <button class="sample-pill" onclick="loadComparePreset('iphone')">Amazon vs Flipkart (iPhone)</button>
+          <button class="sample-pill" onclick="loadComparePreset('samsung')">Amazon vs Flipkart (Samsung S25)</button>
+          <button class="sample-pill" onclick="loadComparePreset('laptop')">Amazon vs Flipkart (Laptop)</button>
+        </div>
+      </div>
+
+      <div id="compare-url-results" style="margin-top:24px;"></div>
+    </div>
+
+    <!-- ✍️ TEXT COMPARISON MODE -->
+    <div id="comp-mode-text" class="compare-mode-panel" style="display:none;">
+      <div class="compare-grid" id="compare-inputs">
+        <div class="compare-input-card">
+          <div class="input-label" style="padding:12px 14px 0;">Text 1</div>
+          <textarea class="compare-ta" placeholder="Enter first text…" style="background:transparent;border:none;outline:none;width:100%;padding:10px 14px;color:#e0e0e0;font-family:inherit;font-size:14px;resize:vertical;min-height:80px;"></textarea>
+        </div>
+        <div class="compare-input-card">
+          <div class="input-label" style="padding:12px 14px 0;">Text 2</div>
+          <textarea class="compare-ta" placeholder="Enter second text…" style="background:transparent;border:none;outline:none;width:100%;padding:10px 14px;color:#e0e0e0;font-family:inherit;font-size:14px;resize:vertical;min-height:80px;"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn-analyze" onclick="runCompare()">Compare Texts →</button>
+        <button class="btn-clear" onclick="addCompareInput()">+ Add Text</button>
+        <button class="btn-clear" onclick="resetCompare()">Reset</button>
+      </div>
+      <div id="compare-results" style="margin-top:24px;"></div>
+    </div>
+  </div>
+
+  <!-- ═══ WEBPAGE ANALYZER PAGE ═══ -->
+  <div class="page" id="page-url">
+    <h1 class="page-title">Automated Webpage Review Scraper</h1>
+    <p class="page-sub">Scrape public URLs, extract review blocks & analyze Hinglish sentiment automatically</p>
+
+    <div class="card" style="margin-top:20px;padding:24px;">
+      <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:8px;font-weight:600;">E-Commerce Product / Online Webpage URL</label>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <input type="text" id="url-input" placeholder="https://www.amazon.in/dp/B0FQG8MVMC or any product review URL" style="flex:1;min-width:280px;background:#141414;border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:#fff;font-family:inherit;font-size:14px;outline:none;"/>
+        <button class="btn-analyze" onclick="analyzeUrl()">Scrape & Analyze URL →</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted);font-weight:600;">Try Presets:</span>
+        <button class="sample-pill" onclick="document.getElementById('url-input').value='https://www.amazon.in/dp/B0FQG8MVMC';analyzeUrl();">Amazon iPhone Pro Max Reviews</button>
+        <button class="sample-pill" onclick="document.getElementById('url-input').value='https://example.com/tech-blog-reviews';analyzeUrl();">Tech Blog Reviews</button>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-top:10px;">
+        Automatic language detection identifies Hinglish, Hindi (Devanagari), English, and Mixed Script review blocks.
+      </div>
+    </div>
+
+    <div id="url-results" style="margin-top:24px;"></div>
+  </div>
+
+  <!-- ═══ DEVELOPER API HUB PAGE ═══ -->
+  <div class="page" id="page-apihub">
+    <h1 class="page-title">Developer & Enterprise API Hub</h1>
+    <p class="page-sub">Integrate VaakBhav's dual-lang sentiment engine directly into your websites & apps</p>
+
+    <div class="card" style="margin-top:20px;padding:24px;background:linear-gradient(135deg, rgba(245,197,24,0.08) 0%, rgba(20,20,20,0.95) 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+        <div>
+          <div style="font-size:12px;color:var(--yellow);font-weight:700;letter-spacing:.08em;text-transform:uppercase;">API-as-a-Service Ready</div>
+          <div style="font-size:20px;font-weight:800;color:#fff;margin-top:4px;">Your Production API Key</div>
+        </div>
+        <button class="btn-launch" style="padding:8px 16px;font-size:13px;" onclick="copyApiKey()">Copy API Key 📋</button>
+      </div>
+      <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-top:16px;font-family:monospace;font-size:14px;color:var(--yellow);letter-spacing:0.05em;" id="api-key-box">
+        vb_live_9f8a7c6b5a4e3d2c1b0a9f8e7d6c5b4a
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;padding:24px;">
+      <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:16px;">Integration Code Generator</h3>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="tab-btn active" id="tab-code-js" onclick="selectCodeTab('js')">JavaScript (Fetch)</button>
+        <button class="tab-btn" id="tab-code-curl" onclick="selectCodeTab('curl')">cURL</button>
+        <button class="tab-btn" id="tab-code-python" onclick="selectCodeTab('python')">Python</button>
+        <button class="tab-btn" id="tab-code-node" onclick="selectCodeTab('node')">Node.js</button>
+        <button class="tab-btn" id="tab-code-php" onclick="selectCodeTab('php')">PHP</button>
+      </div>
+
+      <pre style="background:#0a0a0a;border:1px solid var(--border);border-radius:10px;padding:18px;color:#00e676;font-family:monospace;font-size:13px;line-height:1.6;overflow-x:auto;" id="code-container">
+// JavaScript (Fetch API) integration snippet
+fetch("http://localhost:5000/api/v1/predict", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-API-Key": "vb_live_9f8a7c6b5a4e3d2c1b0a9f8e7d6c5b4a"
+  },
+  body: JSON.stringify({
+    text: "Yeh product bilkul mast hai! Delivery super fast thi."
+  })
+})
+.then(res => res.json())
+.then(data => console.log("Sentiment:", data.data.sentiment, "Confidence:", data.data.confidence + "%"));
+      </pre>
+    </div>
+
+    <div class="card" style="margin-top:20px;padding:24px;">
+      <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:16px;">Interactive API Sandbox</h3>
+      <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+        <input type="text" id="sandbox-input" value="Yeh item ekdum bakwas hai, bilkul mat kharido" style="flex:1;min-width:260px;background:#141414;border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:#fff;font-family:inherit;font-size:14px;outline:none;"/>
+        <button class="btn-analyze" onclick="testApiSandbox()">Test Request →</button>
+      </div>
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">API Response Payload (JSON)</label>
+      <pre style="background:#0a0a0a;border:1px solid var(--border);border-radius:10px;padding:16px;color:#448aff;font-family:monospace;font-size:12px;max-height:260px;overflow:auto;" id="sandbox-output">
+Click 'Test Request' to execute API call...
+      </pre>
+    </div>
+  </div>
+
+  <!-- ═══ ABOUT PAGE ═══ -->
+  <div class="page" id="page-about">
+    <h1 class="page-title">About VaakBhav</h1>
+    <p class="page-sub">Hinglish Sentiment Analysis Platform</p>
+    <div class="about-section">
+      <h3>FAQs</h3>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What languages does VaakBhav support?</div><div class="faq-a">VaakBhav supports Hindi, English, and Hinglish (mixed Hindi-English) text. The model is specifically trained on code-mixed Indian language data.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">How many texts can I analyze at once?</div><div class="faq-a">Up to 1,000,000 rows via file upload (CSV or TXT, max 200 MB). The text list and paragraph modes support up to 500 words per entry.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">What do the sentiment labels mean?</div><div class="faq-a">Positive — the text expresses approval, happiness, or praise. Negative — the text expresses criticism, sadness, or disapproval. Neutral — the text is factual or balanced with no clear emotional lean.</div></div>
+      <div class="faq-item" onclick="toggleFaq(this)"><div class="faq-q">Is my data stored?</div><div class="faq-a">No. VaakBhav processes text entirely in-session. Your data is never stored on any server and is discarded immediately after prediction.</div></div>
+    </div>
+    <div class="about-section">
+      <h3>App Info</h3>
+      <div class="about-grid">
+        <div class="about-card"><div class="label">Model</div><div class="val">Calibrated Linear SVM</div></div>
+        <div class="about-card"><div class="label">Accuracy</div><div class="val">78.52% Acc (77.40% Macro F1)</div></div>
+        <div class="about-card"><div class="label">Features</div><div class="val">Word (1-3) + Subword Char (2-6) TF-IDF (25k)</div></div>
+        <div class="about-card"><div class="label">Classes</div><div class="val">Positive · Neutral · Negative</div></div>
+        <div class="about-card"><div class="label">Max Input</div><div class="val">500 words per text</div></div>
+        <div class="about-card"><div class="label">Batch Size</div><div class="val">Up to 1,000,000 rows</div></div>
+      </div>
+    </div>
+    <div class="about-section">
+      <h3>Privacy Note</h3>
+      <div class="faq-item"><div class="faq-a">This tool does not collect, store, or share your data. All predictions happen on the server in real-time and are not retained. Session history is stored only in your browser's memory and is cleared when you close the tab.</div></div>
+    </div>
+    <div class="about-section">
+      <h3>Contact</h3>
+      <div class="faq-item"><div class="faq-a">VaakBhav is an open-source project. For questions, feedback, or contributions, please reach out via the project repository.</div></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let history_items = JSON.parse(localStorage.getItem('vb_history') || '[]');
+
+let currentLang = 'हिंदी';
+let currentBatchMode = 'paragraph';
+let lastBatchResults = null;
+
+const SAMPLES = {
+  movie:"यह फिल्म बहुत अच्छी थी कहानी एकदम मस्त थी और एक्टिंग भी कमाल की।",
+  bad:"Yeh product bilkul bekar hai, waste of money, ghatiya quality.",
+  neutral:"Aaj mausam theek hai. Office ka kaam chal raha hai.",
+  excited:"Zabardast! Yaar yeh toh kamaal ka experience tha! Bahut maza aaya!"
+};
+
+// ═══════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════
+function showPage(page, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  btn.classList.add('active');
+  if(page==='dashboard') renderDashboard();
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+
+function adjustFont(d){
+  const root=document.documentElement;
+  const cur=parseInt(getComputedStyle(root).getPropertyValue('--font-base'))||17;
+  if(d===0) root.style.setProperty('--font-base','17px');
+  else root.style.setProperty('--font-base',(Math.min(22,Math.max(13,cur+d*2)))+'px');
+}
+
+function setLang(l,btn){
+  currentLang=l;
+  document.querySelectorAll('.lang-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setTry(k){document.getElementById('ana-input').value=SAMPLES[k]||'';}
+
+// ═══════════════════════════════════════════
+// ANALYZER
+// ═══════════════════════════════════════════
+async function analyzeText(){
+  const text=document.getElementById('ana-input').value.trim();
+  if(!text){toast('Please enter some text');return;}
+  const btn=document.getElementById('ana-btn');
+  btn.disabled=true;btn.textContent='Analyzing…';
+  showResultLoading();
+  try{
+    const res=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const data=await res.json();
+    if(data.error&&!data.sentiment){showResultError(data.error);return;}
+    showResult(data,text);
+    addHistory(text,data.sentiment,data.scores,null);
+  }catch(e){showResultError('Connection error');}
+  finally{btn.disabled=false;btn.textContent='Analyze →';}
+}
+
+function clearAnalyzer(){
+  document.getElementById('ana-input').value='';
+  document.getElementById('result-empty').style.display='flex';
+  document.getElementById('result-content').style.display='none';
+  document.getElementById('result-card').style.alignItems='center';
+  document.getElementById('result-card').style.justifyContent='center';
+}
+
+function showResultLoading(){
+  const rc=document.getElementById('result-card');
+  document.getElementById('result-empty').innerHTML='<div class="spinner"></div><p>Analyzing…</p>';
+  document.getElementById('result-empty').style.display='flex';
+  document.getElementById('result-content').style.display='none';
+  rc.style.alignItems='center';rc.style.justifyContent='center';
+}
+
+function showResultError(msg){
+  document.getElementById('result-empty').innerHTML=`<div class="icon">⚠️</div><p>${msg}</p>`;
+}
+
+function showResult(data,text){
+  const s=data.sentiment||'Neutral';
+  const scores=data.scores||{Positive:0,Neutral:1,Negative:0};
+  const sc={Positive:Math.round((scores.Positive||0)*100),Neutral:Math.round((scores.Neutral||0)*100),Negative:Math.round((scores.Negative||0)*100)};
+  const hinglish=data.hinglish||[];
+  const topFeats=data.top_features||[];
+  const markers=data.markers||{};
+  const colMap={Positive:'#4caf50',Negative:'#f44336',Neutral:'#448aff'};
+  let hHtml='';
+  if(hinglish.length>0){
+    hHtml=`<div class="hinglish-row"><div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Hinglish Words</div>`;
+    hinglish.forEach(h=>{hHtml+=`<span class="hinglish-chip">🔤 ${h.word} → ${h.meaning}</span>`;});
+    hHtml+=`</div>`;
+  }
+  let tfHtml='';
+  if(topFeats.length>0){
+    tfHtml=`<div class="hinglish-row"><div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Key Sentiment Drivers</div>`;
+    topFeats.forEach(tf=>{tfHtml+=`<span class="hinglish-chip" style="border:1px solid rgba(245,197,24,0.3);">⚡ ${tf.word} (${Math.round(tf.weight*100)}%)</span>`;});
+    tfHtml+=`</div>`;
+  }
+  const wc=data.word_count||text.split(/\s+/).length;
+  document.getElementById('result-empty').style.display='none';
+  const rc=document.getElementById('result-card');
+  rc.style.alignItems='flex-start';rc.style.justifyContent='flex-start';
+  const content=document.getElementById('result-content');
+  content.style.display='block';
+  content.innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <span class="result-sentiment-badge ${s}" style="margin-bottom:0;">● ${s}</span>
+      <span style="font-size:13px;color:var(--muted2);font-weight:600;">Confidence: ${data.confidence!==undefined?data.confidence:sc[s]}%</span>
+      ${markers.script_type?`<span style="font-size:11px;padding:3px 8px;background:#222;border-radius:4px;color:var(--muted2);">${markers.script_type}</span>`:''}
+    </div>
+    <div class="result-conf-label">Confidence Scores</div>
+    ${['Positive','Negative','Neutral'].map(l=>`
+    <div class="conf-bar-row">
+      <span class="name">${l}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${sc[l]}%;background:${colMap[l]};"></div></div>
+      <span class="pct" style="color:${colMap[l]};">${sc[l]}%</span>
+    </div>`).join('')}
+    <div class="vader-row">
+      <span>VADER score</span><span class="vader-val">${data.vader!==undefined?data.vader.toFixed(3):'—'}</span>
+      <span>Words</span><span class="vader-val">${wc}</span>
+      ${data.fallback?'<span style="color:#ff9800;font-size:11px;">VADER fallback</span>':''}
+    </div>
+    ${tfHtml}
+    ${hHtml}
+    <div class="share-row">
+      <button class="btn-share" onclick="copyResult('${s}',${sc[s]})">📋 Copy result</button>
+      <button class="btn-share" onclick="highlightWords()">🔤 Word highlight</button>
+    </div>
+  `;
+  // Store last result for word highlight
+  window._lastResultText = text;
+}
+
+// ═══════════════════════════════════════════
+// BATCH
+// ═══════════════════════════════════════════
+function setBatchMode(mode,btn){
+  currentBatchMode=mode;
+  document.querySelectorAll('.bmode-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.batch-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('bpanel-'+mode).classList.add('active');
+}
+
+async function runBatchParagraph(){
+  const text=document.getElementById('batch-para-input').value.trim();
+  if(!text){toast('Enter a paragraph');return;}
+  await runBatch({text},document.getElementById('batch-para-results'));
+}
+
+async function runBatchList(){
+  const raw=document.getElementById('batch-list-input').value.trim();
+  if(!raw){toast('Enter texts (one per line)');return;}
+  const texts=raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  await runBatch({texts},document.getElementById('batch-list-results'));
+}
+
+async function runBatch(payload,container){
+  container.innerHTML='<div style="padding:24px;text-align:center;"><div class="spinner"></div><p style="color:var(--muted);font-size:14px;margin-top:8px;">Analyzing…</p></div>';
+  try{
+    const res=await fetch('/word-batch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(data.error){container.innerHTML=`<div style="padding:20px;color:#f44336;">${data.error}</div>`;return;}
+    lastBatchResults=data;
+    renderBatchResults(data,container,false);
+    // Add to history as batch
+    if(data.stats) addHistoryBatch(data);
+  }catch(e){container.innerHTML=`<div style="padding:20px;color:#f44336;">Connection error</div>`;}
+}
+
+function handleFileSelect(e){
+  const file=e.target.files[0];
+  if(file) uploadFile(file);
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragover');
+  const file=e.dataTransfer.files[0];
+  if(file) uploadFile(file);
+}
+
+async function uploadFile(file){
+  const container=document.getElementById('batch-file-results');
+  const zone=document.getElementById('upload-zone');
+  zone.querySelector('.title').textContent=file.name;
+  zone.querySelector('.sub').textContent=`${(file.size/1024/1024).toFixed(2)} MB — uploading…`;
+  container.innerHTML='<div style="padding:24px;text-align:center;"><div class="spinner"></div><p style="color:var(--muted);font-size:14px;margin-top:8px;">Processing file…</p></div>';
+  const fd=new FormData();
+  fd.append('file',file);
+  try{
+    const res=await fetch('/word-batch',{method:'POST',body:fd});
+    const data=await res.json();
+    if(data.error){container.innerHTML=`<div style="padding:20px;color:#f44336;">${data.error}</div>`;return;}
+    lastBatchResults=data;
+    zone.querySelector('.sub').textContent=`${data.stats.total.toLocaleString()} rows processed`;
+    renderBatchResults(data,container,true);
+    if(data.stats) addHistoryBatch(data,file.name);
+  }catch(e){container.innerHTML=`<div style="padding:20px;color:#f44336;">Upload failed</div>`;}
+}
+
+function renderBatchResults(data,container,isFile){
+  const stats=data.stats||{};
+  const results=data.results||[];
+  const total=stats.total||results.length;
+  const pos=stats.positive||0,neg=stats.negative||0,neu=stats.neutral||0;
+  const colMap={Positive:'#4caf50',Negative:'#f44336',Neutral:'#448aff'};
+  const fileInfo=isFile&&stats.total>10000?`<div class="file-rows-info">📊 ${stats.total.toLocaleString()} rows analyzed — showing first ${Math.min(results.length,200).toLocaleString()}</div>`:'';
+  const rows=results.slice(0,200).map((r,i)=>{
+    const txt=r.text||r.sentence||r.cleaned_text||'—';
+    const s=r.sentiment||'Neutral';
+    const pct=r.scores?Math.round((r.scores[s]||0)*100):100;
+    return `<div class="result-row">
+      <span style="color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${txt.substring(0,120)}</span>
+      <span class="sent-badge ${s}">${s}</span>
+      <span style="color:${colMap[s]};font-weight:600;">${pct}%</span>
+    </div>`;
+  }).join('');
+  container.innerHTML=`
+    ${fileInfo}
+    <div class="batch-stats-grid">
+      <div class="bstat total"><div class="num">${total.toLocaleString()}</div><div class="lbl">Total</div></div>
+      <div class="bstat pos"><div class="num">${pos.toLocaleString()}</div><div class="lbl">Positive</div></div>
+      <div class="bstat neg"><div class="num">${neg.toLocaleString()}</div><div class="lbl">Negative</div></div>
+      <div class="bstat neu"><div class="num">${neu.toLocaleString()}</div><div class="lbl">Neutral</div></div>
+    </div>
+    <div class="result-table">
+      <div class="result-table-header"><span>Text</span><span>Sentiment</span><span>Confidence</span></div>
+      ${rows||'<div style="padding:20px;color:var(--muted);text-align:center;">No results</div>'}
+    </div>
+    <button class="download-btn" onclick="downloadCSV()">⬇ Download Full Results CSV</button>
+  `;
+}
+
+function downloadCSV(){
+  if(!lastBatchResults)return;
+  const rows=lastBatchResults.results||[];
+  let csv='text,sentiment,confidence,vader\n';
+  rows.forEach(r=>{
+    const txt=(r.text||r.sentence||'').replace(/"/g,'""');
+    const s=r.sentiment||'Neutral';
+    const pct=r.scores?Math.round((r.scores[s]||0)*100):100;
+    csv+=`"${txt}",${s},${pct}%,${r.vader!==undefined?r.vader:''}\n`;
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='vaakbhav_results.csv';
+  a.click();
+}
+
+// ═══════════════════════════════════════════
+// HISTORY & DASHBOARD
+// ═══════════════════════════════════════════
+function addHistory(text,sentiment,scores,extra){
+  const item={text:text.substring(0,120),sentiment,confidence:Math.round(((scores||{})[sentiment]||1)*100),ts:Date.now(),type:'single'};
+  history_items.unshift(item);
+  if(history_items.length>500)history_items=history_items.slice(0,500);
+  saveHistory();
+  renderDashboard();
+}
+
+function addHistoryBatch(data,filename){
+  const stats=data.stats||{};
+  const total=stats.total||0;
+  const dominant=data.overall||'Neutral';
+  const item={text:filename?`📁 ${filename} — ${total.toLocaleString()} rows`:`Batch: ${total} items`,sentiment:dominant,confidence:Math.round((stats[dominant.toLowerCase()]||0)/Math.max(total,1)*100),ts:Date.now(),type:'batch',rows:total};
+  history_items.unshift(item);
+  if(history_items.length>500)history_items=history_items.slice(0,500);
+  saveHistory();
+  renderDashboard();
+}
+
+function addHistoryUrl(data){
+  const stats=data.stats||{};
+  const total=stats.total||(data.results||[]).length||1;
+  const overall=data.overall_sentiment||'Neutral';
+  const item={
+    text:`🌐 ${data.page_title||data.url} (${total} reviews)`,
+    sentiment:overall,
+    confidence:Math.round(data.positive_pct||85),
+    ts:Date.now(),
+    type:'url',
+    rows:total
+  };
+  history_items.unshift(item);
+  if(history_items.length>500)history_items=history_items.slice(0,500);
+  saveHistory();
+  renderDashboard();
+}
+
+function saveHistory(){
+  try{localStorage.setItem('vb_history',JSON.stringify(history_items));}catch(e){}
+}
+
+function clearHistory(){
+  history_items=[];
+  saveHistory();
+  renderDashboard();
+}
+
+function renderDashboard(){
+  const pos=history_items.filter(h=>h.sentiment==='Positive').length;
+  const neg=history_items.filter(h=>h.sentiment==='Negative').length;
+  const neu=history_items.filter(h=>h.sentiment==='Neutral').length;
+  const total=history_items.length;
+
+  // Count total rows including batch
+  const totalRows=history_items.reduce((acc,h)=>acc+(h.rows||1),0);
+
+  document.getElementById('ds-total').textContent=totalRows.toLocaleString();
+  document.getElementById('ds-pos').textContent=history_items.filter(h=>h.sentiment==='Positive').reduce((a,h)=>a+(h.rows||1),0).toLocaleString();
+  document.getElementById('ds-neg').textContent=history_items.filter(h=>h.sentiment==='Negative').reduce((a,h)=>a+(h.rows||1),0).toLocaleString();
+  document.getElementById('ds-neu').textContent=history_items.filter(h=>h.sentiment==='Neutral').reduce((a,h)=>a+(h.rows||1),0).toLocaleString();
+
+  document.getElementById('leg-pos').textContent=pos;
+  document.getElementById('leg-neg').textContent=neg;
+  document.getElementById('leg-neu').textContent=neu;
+
+  // Bar chart
+  const maxVal=Math.max(pos,neg,neu,1);
+  const maxH=130;
+  document.getElementById('bar-pos').style.height=Math.round(pos/maxVal*maxH)+'px';
+  document.getElementById('bar-neg').style.height=Math.round(neg/maxVal*maxH)+'px';
+  document.getElementById('bar-neu').style.height=Math.round(neu/maxVal*maxH)+'px';
+
+  // Donut
+  const circ=2*Math.PI*60;
+  const pP=total?pos/total:0,pN=total?neg/total:0,pNu=total?neu/total:0;
+  const dPos=document.getElementById('donut-pos');
+  const dNeg=document.getElementById('donut-neg');
+  const dNeu=document.getElementById('donut-neu');
+  const posLen=pP*circ,negLen=pN*circ,neuLen=pNu*circ;
+  dPos.setAttribute('stroke-dasharray',`${posLen} ${circ-posLen}`);
+  dPos.setAttribute('stroke-dashoffset','0');
+  dNeg.setAttribute('stroke-dasharray',`${negLen} ${circ-negLen}`);
+  dNeg.setAttribute('stroke-dashoffset',`${-posLen}`);
+  dNeu.setAttribute('stroke-dasharray',`${neuLen} ${circ-neuLen}`);
+  dNeu.setAttribute('stroke-dashoffset',`${-(posLen+negLen)}`);
+  // Donut center label — shows dominant sentiment %
+  const pctEl = document.getElementById('donut-center-pct');
+  const lblEl = document.getElementById('donut-center-lbl');
+  if(pctEl && lblEl){
+    const domPct = total?Math.round(Math.max(pP,pN,pNu)*100):0;
+    const domLbl = total?(pP>=pN&&pP>=pNu?'positive':pN>=pNu?'negative':'neutral'):'—';
+    pctEl.textContent = domPct+'%';
+    lblEl.textContent = domLbl;
+  }
+
+  // History list
+  const colMap={Positive:'#4caf50',Negative:'#f44336',Neutral:'#448aff'};
+  const hl=document.getElementById('history-list');
+  if(history_items.length===0){
+    hl.innerHTML='<div class="empty-history">No predictions yet. Start analyzing!</div>';
+    return;
+  }
+  hl.innerHTML=history_items.map(h=>{
+    const ago=h.ts?timeAgo(h.ts):'';
+    return `<div class="history-item">
+      <div class="hist-dot" style="background:${colMap[h.sentiment]||'#666'};"></div>
+      <div class="hist-text">${escHtml(h.text)}</div>
+      <div class="hist-right">
+        <span class="hist-badge ${h.sentiment}">${h.sentiment}</span>
+        <span class="hist-pct">${h.confidence}%</span>
+        <span class="hist-time">${ago}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════════════════
+// HEALTH CHECK
+// ═══════════════════════════════════════════
+async function checkHealth(){
+  try{
+    const res=await fetch('/health');
+    const data=await res.json();
+    const modelName = (data.model_metrics && data.model_metrics.best_model) ? data.model_metrics.best_model : (data.model_loaded || data.model ? 'Calibrated Linear SVM' : 'VADER Fallback');
+    const accLabel = (data.model_metrics && data.model_metrics.accuracy) ? `${data.model_metrics.accuracy}% Acc (Leak-Free)` : (data.model_loaded || data.model ? '78.5% Acc (Leak-Free)' : 'NLTK only');
+    document.getElementById('model-status-label').textContent = modelName;
+    document.getElementById('model-status-sub').textContent = accLabel;
+  }catch(e){
+    document.getElementById('model-status-label').textContent='Offline';
+    document.getElementById('model-status-sub').textContent='Cannot reach server';
+  }
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ═══════════════════════════════════════════
+// COPY & SHARE
+// ═══════════════════════════════════════════
+function copyResult(sentiment, pct){
+  const text = document.getElementById('ana-input').value.trim().substring(0,100);
+  const msg  = `VaakBhav result:\n"${text}…"\nSentiment: ${sentiment} (${pct}% confidence)`;
+  navigator.clipboard.writeText(msg).then(()=>toast('Result copied!')).catch(()=>toast('Copy failed'));
+}
+
+// ═══════════════════════════════════════════
+// WORD HIGHLIGHT
+// ═══════════════════════════════════════════
+async function highlightWords(){
+  const text = window._lastResultText || document.getElementById('ana-input').value.trim();
+  if(!text){toast('No text to highlight');return;}
+  const section = document.getElementById('word-hl-section');
+  const output  = document.getElementById('word-hl-output');
+  section.style.display='block';
+  output.innerHTML='<span style="color:var(--muted);font-size:13px;">Loading…</span>';
+  try{
+    const res  = await fetch('/api/word-sentiment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const data = await res.json();
+    if(data.error){output.innerHTML=`<span style="color:#f44336;">${data.error}</span>`;return;}
+    output.innerHTML = data.words.map(w=>{
+      const cls = w.sentiment==='Positive'?'w-pos':w.sentiment==='Negative'?'w-neg':'w-neu';
+      return `<span class="${cls}">${escHtml(w.word)}</span>`;
+    }).join(' ');
+  }catch(e){output.innerHTML='<span style="color:#f44336;">Error</span>';}
+}
+
+// ═══════════════════════════════════════════
+// COMPARE (WEBPAGE & TEXT)
+// ═══════════════════════════════════════════
+function setCompareSubMode(mode, btn){
+  document.querySelectorAll('#page-compare .bmode-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.compare-mode-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('comp-mode-' + mode).style.display = 'block';
+}
+
+function addUrlCompareInput(){
+  const container = document.getElementById('compare-url-inputs');
+  const cards = container.querySelectorAll('.url-compare-card');
+  if(cards.length >= 5){ toast('Maximum 5 website URLs'); return; }
+  const div = document.createElement('div');
+  div.className = 'url-compare-card';
+  div.style.cssText = 'background:#141414;border:1px solid var(--border);border-radius:10px;padding:14px;';
+  div.innerHTML = `
+    <div style="font-size:11px;color:var(--yellow);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Website #${cards.length+1} URL</div>
+    <input type="text" class="compare-url-field" placeholder="https://..." style="width:100%;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:#fff;font-family:inherit;font-size:14px;outline:none;"/>
+  `;
+  container.appendChild(div);
+}
+
+function resetUrlCompare(){
+  const container = document.getElementById('compare-url-inputs');
+  container.innerHTML = `
+    <div class="url-compare-card" style="background:#141414;border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <div style="font-size:11px;color:var(--yellow);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Website #1 (e.g. Amazon URL)</div>
+      <input type="text" class="compare-url-field" placeholder="https://www.amazon.in/dp/B0FQG8MVMC" style="width:100%;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:#fff;font-family:inherit;font-size:14px;outline:none;" value="https://www.amazon.in/dp/B0FQG8MVMC"/>
+    </div>
+    <div class="url-compare-card" style="background:#141414;border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <div style="font-size:11px;color:var(--yellow);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;">Website #2 (e.g. Flipkart / Blog URL)</div>
+      <input type="text" class="compare-url-field" placeholder="https://www.flipkart.com/apple-iphone-15/p/itm6ac2093e9a7e4" style="width:100%;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:#fff;font-family:inherit;font-size:14px;outline:none;" value="https://www.flipkart.com/apple-iphone-15/p/itm6ac2093e9a7e4"/>
+    </div>
+  `;
+  document.getElementById('compare-url-results').innerHTML = '';
+}
+
+function loadComparePreset(key){
+  resetUrlCompare();
+  const fields = document.querySelectorAll('.compare-url-field');
+  if(key === 'iphone'){
+    fields[0].value = 'https://www.amazon.in/iPhone-Pro-Max-512-Promotion/dp/B0FQG8MVMC';
+    fields[1].value = 'https://www.flipkart.com/apple-iphone-15-black-128-gb/p/itm6ac2093e9a7e4';
+  } else if(key === 'samsung'){
+    fields[0].value = 'https://www.amazon.in/Samsung-Galaxy-Ultra-Titanium-Storage/dp/B0CS5X6D8G';
+    fields[1].value = 'https://www.flipkart.com/samsung-galaxy-s24-ultra-5g/p/itm5b0a7b45f';
+  } else if(key === 'laptop'){
+    fields[0].value = 'https://www.amazon.in/Apple-MacBook-Chip-13-inch-256GB/dp/B08N5W4NNB';
+    fields[1].value = 'https://www.flipkart.com/apple-macbook-air-m1-8-gb-256-gb-ssd/p/itm3c872f9e67236';
+  }
+  runWebpageCompare();
+}
+
+async function runWebpageCompare(){
+  const inputs = Array.from(document.querySelectorAll('.compare-url-field'));
+  const urls = inputs.map(i => i.value.trim()).filter(Boolean);
+  if(urls.length < 2){
+    toast('Please enter at least 2 website URLs to compare.');
+    return;
+  }
+  const container = document.getElementById('compare-url-results');
+  container.innerHTML = '<div style="padding:32px;text-align:center;"><div class="spinner"></div><p style="color:var(--muted);margin-top:12px;font-size:14px;">Scraping & comparing customer reviews across websites…</p></div>';
+  
+  try{
+    const res = await fetch('/api/v1/compare-urls', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls })
+    });
+    const data = await res.json();
+    if(data.error){
+      container.innerHTML = `<div style="color:#f44336;padding:16px;">${escHtml(data.error)}</div>`;
+      return;
+    }
+
+    const comps = data.comparisons || [];
+    const winner = data.winner || {};
+    const colMap = { Positive: '#00e676', Negative: '#ff5252', Neutral: '#448aff' };
+
+    let html = `
+      <div style="background:linear-gradient(135deg, rgba(245,197,24,0.15) 0%, rgba(20,20,20,0.95) 100%);border:1px solid var(--yellow);border-radius:14px;padding:22px;margin-bottom:24px;">
+        <div style="font-size:11px;color:var(--yellow);font-weight:800;letter-spacing:.08em;text-transform:uppercase;">Comparative Customer Rating Winner</div>
+        <h2 style="font-size:20px;font-weight:900;color:#fff;margin-top:4px;">${escHtml(winner.page_title || winner.domain)}</h2>
+        <div style="font-size:13px;color:#ddd;margin-top:6px;">
+          Highest Approval Rating: <strong style="color:var(--yellow);font-size:15px;">${winner.positive_pct}% Positive Customer Feedback</strong> across analyzed reviews!
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+    `;
+
+    comps.forEach((c) => {
+      const isWinner = c.index === winner.index;
+      const s = c.overall_sentiment || 'Neutral';
+      const sampleTxt = (c.results_sample && c.results_sample[0]) ? c.results_sample[0].text : 'No review text';
+
+      html += `
+        <div style="background:var(--card);border:${isWinner ? '2px solid var(--yellow)' : '1px solid var(--border)'};border-radius:14px;padding:20px;position:relative;">
+          ${isWinner ? '<span style="position:absolute;top:14px;right:14px;background:var(--yellow);color:#000;font-size:10px;font-weight:900;padding:3px 8px;border-radius:4px;text-transform:uppercase;">Winner</span>' : ''}
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">Website #${c.index}</div>
+          <h3 style="font-size:16px;font-weight:800;color:#fff;margin-top:4px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(c.page_title)}">${escHtml(c.page_title)}</h3>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">${escHtml(c.domain)} · ${c.blocks_scraped} reviews</div>
+
+          <div style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;background:${colMap[s]}22;color:${colMap[s]};border:1px solid ${colMap[s]}44;margin-bottom:16px;">
+            ${s} · ${c.positive_pct}% Positive
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+            <div class="conf-bar-row">
+              <span class="name" style="width:64px;font-size:12px;color:#ccc;">Positive</span>
+              <div class="bar-track" style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;"><div style="width:${c.positive_pct}%;height:100%;background:#00e676;"></div></div>
+              <span style="font-size:12px;font-weight:700;color:#00e676;width:40px;text-align:right;">${c.positive_pct}%</span>
+            </div>
+            <div class="conf-bar-row">
+              <span class="name" style="width:64px;font-size:12px;color:#ccc;">Neutral</span>
+              <div class="bar-track" style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;"><div style="width:${c.neutral_pct}%;height:100%;background:#448aff;"></div></div>
+              <span style="font-size:12px;font-weight:700;color:#448aff;width:40px;text-align:right;">${c.neutral_pct}%</span>
+            </div>
+            <div class="conf-bar-row">
+              <span class="name" style="width:64px;font-size:12px;color:#ccc;">Negative</span>
+              <div class="bar-track" style="flex:1;height:6px;background:#222;border-radius:3px;overflow:hidden;"><div style="width:${c.negative_pct}%;height:100%;background:#ff5252;"></div></div>
+              <span style="font-size:12px;font-weight:700;color:#ff5252;width:40px;text-align:right;">${c.negative_pct}%</span>
+            </div>
+          </div>
+
+          <div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Sample Extracted Review:</div>
+          <div style="font-size:13px;color:#ccc;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:10px 12px;line-height:1.4;">
+            "${escHtml(sampleTxt.substring(0, 110))}…"
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+  }catch(e){
+    container.innerHTML = '<div style="color:#f44336;padding:16px;">Connection error during webpage comparison</div>';
+  }
+}
+
+function addCompareInput(){
+  const grid = document.getElementById('compare-inputs');
+  const count = grid.querySelectorAll('.compare-input-card').length;
+  if(count>=5){toast('Maximum 5 texts');return;}
+  const div = document.createElement('div');
+  div.className='compare-input-card';
+  div.innerHTML=`<div class="input-label" style="padding:12px 14px 0;">Text ${count+1}</div>
+    <textarea class="compare-ta" placeholder="Enter text…" style="background:transparent;border:none;outline:none;width:100%;padding:10px 14px;color:#e0e0e0;font-family:inherit;font-size:14px;resize:vertical;min-height:80px;"></textarea>`;
+  grid.appendChild(div);
+}
+
+function resetCompare(){
+  const grid = document.getElementById('compare-inputs');
+  const tas = grid.querySelectorAll('textarea');
+  tas.forEach(t=>t.value='');
+  document.getElementById('compare-results').innerHTML='';
+  const cards = Array.from(grid.querySelectorAll('.compare-input-card'));
+  cards.slice(2).forEach(c=>c.remove());
+  const labels = grid.querySelectorAll('.input-label');
+  labels.forEach((l,i)=>l.textContent=`Text ${i+1}`);
+}
+
+async function runCompare(){
+  const tas   = Array.from(document.querySelectorAll('.compare-ta'));
+  const texts = tas.map(t=>t.value.trim()).filter(Boolean);
+  if(texts.length<2){toast('Enter at least 2 texts');return;}
+  const container = document.getElementById('compare-results');
+  container.innerHTML='<div style="padding:20px;text-align:center;"><div class="spinner"></div><p style="color:var(--muted);margin-top:8px;font-size:14px;">Comparing…</p></div>';
+  try{
+    const res  = await fetch('/api/compare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texts})});
+    const data = await res.json();
+    if(data.error){container.innerHTML=`<div style="color:#f44336;padding:16px;">${data.error}</div>`;return;}
+    const colMap={Positive:'#4caf50',Negative:'#f44336',Neutral:'#448aff'};
+    container.innerHTML=`<div class="compare-grid" style="margin-top:0;">
+      ${data.results.map((r,i)=>{
+        const s=r.sentiment||'Neutral';
+        const sc=r.scores||{};
+        const pct=Math.round((sc[s]||0)*100);
+        const bars=['Positive','Negative','Neutral'].map(l=>`
+          <div class="conf-bar-row" style="margin-bottom:6px;">
+            <span class="name" style="width:68px;font-size:12px;color:#ccc;">${l}</span>
+            <div class="bar-track" style="flex:1;height:6px;background:#252525;border-radius:3px;overflow:hidden;">
+              <div class="bar-fill" style="width:${Math.round((sc[l]||0)*100)}%;background:${colMap[l]};"></div>
+            </div>
+            <span style="width:32px;text-align:right;font-size:12px;font-weight:600;color:${colMap[l]};">${Math.round((sc[l]||0)*100)}%</span>
+          </div>`).join('');
+        return `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Text ${i+1}</div>
+          <div style="font-size:13px;color:#bbb;margin-bottom:12px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml((r.original_text||'').substring(0,120))}</div>
+          <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:14px;font-weight:700;background:${colMap[s]}22;color:${colMap[s]};border:1px solid ${colMap[s]}44;margin-bottom:12px;">${s} · ${pct}%</span>
+          ${bars}
+          ${r.vader!==undefined?`<div style="font-size:12px;color:var(--muted);margin-top:8px;">VADER: ${r.vader.toFixed(3)}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+  }catch(e){container.innerHTML='<div style="color:#f44336;padding:16px;">Connection error</div>';}
+}
+
+// ═══════════════════════════════════════════
+// FAQ ACCORDION
+// ═══════════════════════════════════════════
+function toggleFaq(el){el.classList.toggle('open');}
+
+// ═══════════════════════════════════════════
+// TIME AGO
+// ═══════════════════════════════════════════
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return'just now';
+  if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+// ═══════════════════════════════════════════
+// WEBPAGE URL SCRAPER ENGINE
+// ═══════════════════════════════════════════
+async function analyzeUrl(){
+  const urlInput = document.getElementById('url-input');
+  const url = urlInput.value.trim();
+  if(!url){ toast('Please enter a valid webpage URL'); return; }
+  const container = document.getElementById('url-results');
+  container.innerHTML = '<div style="padding:32px;text-align:center;"><div class="spinner"></div><p style="color:var(--muted);margin-top:12px;font-size:14px;">Fetching webpage & analyzing reviews…</p></div>';
+  
+  try{
+    const res = await fetch('/api/v1/analyze-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+    if(data.error){
+      container.innerHTML = `<div style="background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.3);border-radius:12px;padding:20px;color:#ff5252;">${escHtml(data.error)}</div>`;
+      return;
+    }
+
+    const st = data.stats || {};
+    const langs = st.languages || {};
+    const overall = data.overall_sentiment || 'Neutral';
+    const posPct = st.positive_pct !== undefined ? st.positive_pct : Math.round(((st.positive||0)/(st.total||1))*100);
+    const colMap = { Positive: '#00e676', Negative: '#ff5252', Neutral: '#448aff' };
+
+    // Record in History & update Dashboard metrics automatically
+    addHistoryUrl(data);
+
+    let html = `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <div style="font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;">Page Title / E-Commerce Product</div>
+          <h2 style="font-size:18px;font-weight:800;color:#fff;margin-top:2px;">${escHtml(data.page_title || url)}</h2>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">${escHtml(data.url)} · ${data.blocks_scraped} reviews extracted in ${data.latency_ms}ms</div>
+        </div>
+        <span style="padding:8px 18px;border-radius:999px;font-size:15px;font-weight:800;background:${colMap[overall]}22;color:${colMap[overall]};border:1px solid ${colMap[overall]}44;">
+          ${overall} · ${posPct}% Positive
+        </span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px;">
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#fff;">${st.total||0}</div>
+          <div style="font-size:11px;color:var(--muted);">Total Reviews</div>
+        </div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#00e676;">${st.positive||0} (${st.positive_pct||0}%)</div>
+          <div style="font-size:11px;color:var(--muted);">Positive</div>
+        </div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#448aff;">${st.neutral||0} (${st.neutral_pct||0}%)</div>
+          <div style="font-size:11px;color:var(--muted);">Neutral</div>
+        </div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#ff5252;">${st.negative||0} (${st.negative_pct||0}%)</div>
+          <div style="font-size:11px;color:var(--muted);">Negative</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted);font-weight:600;">Detected Languages:</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:var(--yellow);border:1px solid var(--border);">Hinglish (${langs.Hinglish||0})</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#00e676;border:1px solid var(--border);">English (${langs.English||0})</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#448aff;border:1px solid var(--border);">Hindi (${langs.Hindi||0})</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#ab47bc;border:1px solid var(--border);">Mixed (${langs.Mixed||0})</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:14px;">Extracted Review Blocks & Language Detection</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;">`;
+
+    (data.results || []).slice(0, 30).forEach((r, idx) => {
+      const s = r.sentiment || 'Neutral';
+      const langBadge = r.language ? (r.language.language || r.language.badge || 'English') : 'English';
+      html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:var(--muted);">Review #${idx+1}</span>
+            <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#1a1a1a;color:#ccc;border:1px solid #333;">${langBadge}</span>
+          </div>
+          <span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:${colMap[s]}22;color:${colMap[s]};border:1px solid ${colMap[s]}44;">
+            ${s} (${r.confidence}%)
+          </span>
+        </div>`-muted);">Total Reviews</div>
+        </div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#00e676;">${st.positive||0} (${st.positive_pct||0}%)</div>
+          <div style="font-size:11px;color:var(--muted);">Positive</div>
+        </div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#448aff;">${st.neutral||0} (${st.neutral_pct||0}%)</div>
+          <div style="font-size:11px;color:var(--muted);">Neutral</div>
+        </div>
+        <div style="background:#0a0a0a;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:22px;font-weight:900;color:#ff5252;">${st.negative||0} (${st.negative_pct||0}%)</div>
+          <div style="font-size:11px;color:var(--muted);">Negative</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--muted);font-weight:600;">Detected Languages:</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:var(--yellow);border:1px solid var(--border);">🔀 Hinglish (${langs.Hinglish||0})</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#00e676;border:1px solid var(--border);">🇬🇧 English (${langs.English||0})</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#448aff;border:1px solid var(--border);">🇮🇳 Hindi (${langs.Hindi||0})</span>
+        <span class="pill" style="font-size:11px;background:#1a1a1a;color:#ab47bc;border:1px solid var(--border);">🌐 Mixed (${langs.Mixed||0})</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:16px;font-weight:700;color:#fff;margin-bottom:14px;">Extracted Review Blocks & Language Detection</h3>
+    <div style="display:flex;flex-direction:column;gap:12px;">`;
+
+    (data.results || []).slice(0, 30).forEach((r, idx) => {
+      const s = r.sentiment || 'Neutral';
+      const langBadge = r.language ? r.language.badge : '🇬🇧 English';
+      html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:var(--muted);">Review #${idx+1}</span>
+            <span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#1a1a1a;color:#ccc;border:1px solid #333;">${langBadge}</span>
+          </div>
+          <span style="padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;background:${colMap[s]}22;color:${colMap[s]};border:1px solid ${colMap[s]}44;">
+            ${emoMap[s]} ${s} (${r.confidence}%)
+          </span>
+        </div>
+        <div style="font-size:14px;color:#e0e0e0;line-height:1.5;">${escHtml(r.text || r.sentence || '')}</div>
+      </div>`;
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+  }catch(e){
+    container.innerHTML = `<div style="color:#ff5252;padding:16px;">Error analyzing URL: ${escHtml(e.message)}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// DEVELOPER API HUB HANDLERS
+// ═══════════════════════════════════════════
+function copyApiKey(){
+  const key = document.getElementById('api-key-box').textContent.trim();
+  navigator.clipboard.writeText(key).then(()=>toast('API Key copied! ✓'));
+}
+
+const CODE_SNIPPETS = {
+  js: `// JavaScript (Fetch API) snippet
+fetch("http://localhost:5000/api/v1/predict", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-API-Key": "vb_live_9f8a7c6b5a4e3d2c1b0a9f8e7d6c5b4a"
+  },
+  body: JSON.stringify({
+    text: "Yeh product bilkul mast hai! Delivery super fast thi."
+  })
+})
+.then(res => res.json())
+.then(data => console.log("Sentiment:", data.data.sentiment, "Confidence:", data.data.confidence + "%"));`,
+
+  curl: `# cURL Terminal snippet
+curl -X POST http://localhost:5000/api/v1/predict \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: vb_live_9f8a7c6b5a4e3d2c1b0a9f8e7d6c5b4a" \\
+  -d '{"text": "Yeh product bilkul mast hai! Delivery super fast thi."}'`,
+
+  python: `# Python (requests library) snippet
+import requests
+
+url = "http://localhost:5000/api/v1/predict"
+headers = {
+    "Content-Type": "application/json",
+    "X-API-Key": "vb_live_9f8a7c6b5a4e3d2c1b0a9f8e7d6c5b4a"
+}
+payload = {
+    "text": "Yeh product bilkul mast hai! Delivery super fast thi."
+}
+
+response = requests.post(url, json=payload, headers=headers)
+data = response.json()
+print("Sentiment:", data["data"]["sentiment"], "Confidence:", data["data"]["confidence"])`,
+
+  node: `// Node.js (axios) snippet
+const axios = require('axios');
+
+axios.post('http://localhost:5000/api/v1/predict', {
+  text: 'Yeh product bilkul mast hai! Delivery super fast thi.'
+}, {
+  headers: { 'X-API-Key': 'vb_live_9f8a7c6b5a4e3d2c1b0a9f8e7d6c5b4a' }
+})
+.then(response => console.log(response.data))
+.catch(error => console.error(error));`,
+
+  php: `<?php
+// PHP cURL snippet
+$ch = curl_init('http://localhost:5000/api/v1/predict');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'X-API-Key: vb_live_9f8a7c6b5a4e3d2c1b0a9f8e7d6c5b4a'
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    'text' => 'Yeh product bilkul mast hai! Delivery super fast thi.'
+]));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;
+?>`
+};
+
+function selectCodeTab(lang){
+  ['js','curl','python','node','php'].forEach(l=>{
+    const btn = document.getElementById(`tab-code-${l}`);
+    if(btn) btn.classList.toggle('active', l===lang);
+  });
+  document.getElementById('code-container').textContent = CODE_SNIPPETS[lang] || CODE_SNIPPETS.js;
+}
+
+async function testApiSandbox(){
+  const input = document.getElementById('sandbox-input').value.trim();
+  const output = document.getElementById('sandbox-output');
+  if(!input){ toast('Enter text to test Sandbox'); return; }
+  output.textContent = 'Executing POST /api/v1/predict request…';
+  
+  try{
+    const res = await fetch('/api/v1/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': 'vb_live_sandbox_demo' },
+      body: JSON.stringify({ text: input })
+    });
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  }catch(e){
+    output.textContent = `API Error: ${e.message}`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// KEYBOARD SHORTCUT (Ctrl+Enter to analyze)
+// ═══════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    const active=document.querySelector('.page.active');
+    if(active&&active.id==='page-analyzer') analyzeText();
+  }
+});
+
+// ═══════════════════════════════════════════
+// UPGRADE DOWNLOAD CSV → server-side export
+// ═══════════════════════════════════════════
+async function downloadCSV(){
+  if(!lastBatchResults){toast('No results to export');return;}
+  toast('Preparing CSV…');
+  try{
+    const res=await fetch('/api/export-csv',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({results:lastBatchResults.results,filename:'vaakbhav_results'})
+    });
+    if(!res.ok){toast('Export failed');return;}
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='vaakbhav_results.csv';a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV downloaded ✓');
+  }catch(e){
+    // fallback to client-side
+    const rows=lastBatchResults.results||[];
+    let csv='text,sentiment,confidence,vader\n';
+    rows.forEach(r=>{
+      const txt=(r.text||r.sentence||'').replace(/"/g,'""');
+      const s=r.sentiment||'Neutral';
+      const pct=r.scores?Math.round((r.scores[s]||0)*100):100;
+      csv+=`"${txt}",${s},${pct}%,${r.vader!==undefined?r.vader:''}\n`;
+    });
+    const a=document.createElement('a');
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download='vaakbhav_results.csv';a.click();
+  }
+}
+
+// ═══════════════════════════════════════════
+// UPGRADE DASHBOARD DONUT CENTER
+// ═══════════════════════════════════════════
+// AUTOMATIC HASH ROUTER FOR INTER-PAGE LINKING
+// ═══════════════════════════════════════════
+function handleHashNavigation(){
+  const hash = window.location.hash.replace('#','').trim();
+  if(hash){
+    const targetNav = document.querySelector(`.nav-item[data-page="${hash}"]`);
+    if(targetNav){
+      showPage(hash, targetNav);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+checkHealth();
+renderDashboard();
+handleHashNavigation();
+window.addEventListener('hashchange', handleHashNavigation);
+
+</script>
+</body>
+</html>

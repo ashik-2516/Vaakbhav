@@ -1,0 +1,47 @@
+{
+  "Linear SVM (Calibrated)": {
+    "cv_accuracy_mean": 78.74,
+    "cv_accuracy_std": 1.92,
+    "cv_macro_f1_mean": 76.95,
+    "cv_macro_f1_std": 2.06,
+    "cv_weighted_f1_mean": 78.49,
+    "cv_precision_mean": 78.85,
+    "cv_recall_mean": 75.91
+  },
+  "Logistic Regression": {
+    "cv_accuracy_mean": 77.41,
+    "cv_accuracy_std": 1.84,
+    "cv_macro_f1_mean": 75.98,
+    "cv_macro_f1_std": 2.09,
+    "cv_weighted_f1_mean": 77.28,
+    "cv_precision_mean": 76.68,
+    "cv_recall_mean": 75.57
+  },
+  "Multinomial Naive Bayes": {
+    "cv_accuracy_mean": 75.06,
+    "cv_accuracy_std": 2.48,
+    "cv_macro_f1_mean": 73.5,
+    "cv_macro_f1_std": 2.42,
+    "cv_weighted_f1_mean": 75.0,
+    "cv_precision_mean": 73.94,
+    "cv_recall_mean": 73.3
+  },
+  "Random Forest": {
+    "cv_accuracy_mean": 74.33,
+    "cv_accuracy_std": 1.39,
+    "cv_macro_f1_mean": 70.94,
+    "cv_macro_f1_std": 1.81,
+    "cv_weighted_f1_mean": 73.31,
+    "cv_precision_mean": 79.49,
+    "cv_recall_mean": 68.68
+  },
+  "Soft Voting Ensemble": {
+    "cv_accuracy_mean": 77.22,
+    "cv_accuracy_std": 1.99,
+    "cv_macro_f1_mean": 75.65,
+    "cv_macro_f1_std": 2.1,
+    "cv_weighted_f1_mean": 77.11,
+    "cv_precision_mean": 76.49,
+    "cv_recall_mean": 75.11
+  }
+}

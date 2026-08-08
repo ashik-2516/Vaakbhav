@@ -1,0 +1,147 @@
+{
+  "total_test_samples": 554,
+  "total_errors": 123,
+  "test_accuracy": 77.8,
+  "error_category_breakdown": {
+    "General Sentiment Misclassification": 22,
+    "Neutral/Polarity Boundary Ambiguity": 85,
+    "Negation Boundary Failure": 16
+  },
+  "sample_error_cases": [
+    {
+      "index": 95,
+      "raw_text": "petitioners  ee-phailing ke madhyam se supreme record men keval pirit person arthat cases filing karne ke ichchhuk person svyn ya nibndhit advocate hi cases filing kar sakta\n",
+      "cleaned_text": "petitioners ee phailing ke madhyam se supreme record men keval pirit person arthat cases filing karne ke ichchhuk person svyn ya nibndhit advocate hi cases filing kar sakta",
+      "true_label": "Positive",
+      "predicted_label": "Negative",
+      "confidence": 0.379,
+      "category": "General Sentiment Misclassification"
+    },
+    {
+      "index": 1511,
+      "raw_text": "reduce local swelling dard ko kam karne hetu barph ki thaili ka pryog kiya jata hai.\n",
+      "cleaned_text": "reduce local swelling dard ko kam karne hetu barph ki thaili ka pryog kiya jata hai",
+      "true_label": "Negative",
+      "predicted_label": "Neutral",
+      "confidence": 0.482,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    },
+    {
+      "index": 1301,
+      "raw_text": "jab tak akabar aath varsh ka huaa janm se lekar ab tak uske sabhi varsh bhari asthirta men nikle the jiske arrangement for education ka sahi prbndh nahin ho paya tha.\n",
+      "cleaned_text": "jab tak akabar aath varsh ka huaa janm se lekar ab tak uske sabhi varsh bhari asthirta men nikle jiske arrangement education ka sahi prbndh nahin ho paya tha",
+      "true_label": "Negative",
+      "predicted_label": "Positive",
+      "confidence": 0.705,
+      "category": "Negation Boundary Failure"
+    },
+    {
+      "index": 2007,
+      "raw_text": "aur vah ek fun hai problem hai , aur yah aksar ke kind men die ge ki tarah hai\n",
+      "cleaned_text": "aur vah ek fun hai problem hai aur yah aksar ke kind men die ge ki tarah hai",
+      "true_label": "Positive",
+      "predicted_label": "Negative",
+      "confidence": 0.363,
+      "category": "General Sentiment Misclassification"
+    },
+    {
+      "index": 2404,
+      "raw_text": "aese drafts jinhen such ke lie bina remitter bank dvara jari advice patr ke prapt hue prastut kiya jae.\n",
+      "cleaned_text": "aese drafts jinhen ke lie bina remitter bank dvara jari advice patr ke prapt hue prastut kiya jae",
+      "true_label": "Neutral",
+      "predicted_label": "Positive",
+      "confidence": 0.662,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    },
+    {
+      "index": 930,
+      "raw_text": "kharab shram management relationship aur workers ka sahabaddh morale poor hona tatha poor productivity , strikes , talabndiyan itya di.\n",
+      "cleaned_text": "kharab shram management relationship aur workers ka sahabaddh morale poor hona tatha poor productivity strikes talabndiyan itya di",
+      "true_label": "Negative",
+      "predicted_label": "Neutral",
+      "confidence": 0.667,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    },
+    {
+      "index": 1193,
+      "raw_text": "un days mannerisms se poorv urdu punjab ki most thi aur intellectuals jinmen se adhikansh to apni speech v state men sahibon jaisa state karte the tachha punjabi ki poori tarah upeksha karte the.\n",
+      "cleaned_text": "un days mannerisms se poorv urdu punjab ki thi aur intellectuals jinmen se adhikansh apni speech v state men sahibon jaisa state karte tachha punjabi ki poori tarah upeksha karte",
+      "true_label": "Negative",
+      "predicted_label": "Positive",
+      "confidence": 0.472,
+      "category": "General Sentiment Misclassification"
+    },
+    {
+      "index": 2001,
+      "raw_text": "jahan kahin economic position nahin change hai , vahan women ka darja bhi aprivartniy raha same\n",
+      "cleaned_text": "jahan kahin economic position nahin change hai vahan women ka darja bhi aprivartniy raha",
+      "true_label": "Negative",
+      "predicted_label": "Neutral",
+      "confidence": 0.596,
+      "category": "Negation Boundary Failure"
+    },
+    {
+      "index": 2438,
+      "raw_text": "notes ya sikkon ki aesi amount jo cashes dainik kary vyavhar ke lie apne nakdi box men rakhta ho.\n",
+      "cleaned_text": "notes ya sikkon ki aesi amount jo cashes dainik kary vyavhar ke lie apne nakdi box men rakhta ho",
+      "true_label": "Neutral",
+      "predicted_label": "Positive",
+      "confidence": 0.415,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    },
+    {
+      "index": 1497,
+      "raw_text": "ke staff ke ek sadasy ne uske bad guard kg earthworms lakar die , jiski kimat chandranna ko 300 rupye deni pari.\n",
+      "cleaned_text": "ke staff ke ek sadasy ne uske bad guard kg earthworms lakar die jiski kimat chandranna ko 300 rupye deni pari",
+      "true_label": "Neutral",
+      "predicted_label": "Positive",
+      "confidence": 0.563,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    },
+    {
+      "index": 1442,
+      "raw_text": "certificate    CERTIFICATENAME   ek certification authority ka prtinidhitv karta hai\n",
+      "cleaned_text": "certificate certificatename ek certification authority ka prtinidhitv karta hai",
+      "true_label": "Positive",
+      "predicted_label": "Neutral",
+      "confidence": 0.832,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    },
+    {
+      "index": 945,
+      "raw_text": "folder 1 pahle hi exists hai 2 owner ban sakta hai aur permissions may change hain kya aap sachmuch 3 ka istemal karna chahte hain\n",
+      "cleaned_text": "folder 1 pahle hi exists hai 2 owner ban sakta hai aur permissions may change hain kya aap sachmuch 3 ka istemal karna chahte hain",
+      "true_label": "Positive",
+      "predicted_label": "Neutral",
+      "confidence": 0.553,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    },
+    {
+      "index": 1047,
+      "raw_text": "ve bas us  last ki  ghari ki prtiksha kar rahe hai ki vah unaware unapar aa pare aur unhen bar bhi n ho\n",
+      "cleaned_text": "bas us last ki ghari ki prtiksha kar rahe hai ki vah unaware unapar aa pare aur unhen bar bhi n ho",
+      "true_label": "Negative",
+      "predicted_label": "Positive",
+      "confidence": 0.671,
+      "category": "General Sentiment Misclassification"
+    },
+    {
+      "index": 1050,
+      "raw_text": "private key ko decode nahin kar saka\n",
+      "cleaned_text": "private key ko decode nahin kar saka",
+      "true_label": "Neutral",
+      "predicted_label": "Negative",
+      "confidence": 0.538,
+      "category": "Negation Boundary Failure"
+    },
+    {
+      "index": 897,
+      "raw_text": "patti ke kendr jiske small leafy plants ki pattiyon leaves of small\n",
+      "cleaned_text": "patti ke kendr jiske small leafy plants ki pattiyon leaves small",
+      "true_label": "Neutral",
+      "predicted_label": "Positive",
+      "confidence": 0.479,
+      "category": "Neutral/Polarity Boundary Ambiguity"
+    }
+  ]
+}
