@@ -1,10 +1,7 @@
 # VaakBhav — Hindi-English (Hinglish) Code-Mixed Sentiment Analyzer
 
-A research-grade machine learning system and full-stack web application designed for **dual-language (Hindi + English / Hinglish)** sentiment analysis. Features a high-performance leak-free ML pipeline, sentiment-preserving NLP preprocessor, model explainability engine, multi-model evaluation bench, and a 3D visual web interface.
-
----
-
-# VaakBhav — Hindi-English (Hinglish) Code-Mixed Sentiment Analyzer
+[![Live Demo](https://img.shields.io/badge/Live_Demo-on_Render-ff5252?style=for-the-badge&logo=render&logoColor=white)](https://vaakbhav.onrender.com)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-f5c518?style=for-the-badge&logo=github&logoColor=black)](https://github.com/ashik-2516/Vaakbhav)
 
 A research-grade machine learning system and full-stack web application designed for **dual-language (Hindi + English / Hinglish)** sentiment analysis. Features a high-performance leak-free ML pipeline, sentiment-preserving NLP preprocessor, model explainability engine, multi-model evaluation bench, and a 3D visual web interface.
 
