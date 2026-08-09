@@ -871,12 +871,24 @@ function toggleSidebar(){
   document.getElementById('sidebar-overlay').classList.toggle('show');
 }
 
-function adjustFont(d){
-  const root=document.documentElement;
-  const cur=parseInt(getComputedStyle(root).getPropertyValue('--font-base'))||17;
-  if(d===0) root.style.setProperty('--font-base','17px');
-  else root.style.setProperty('--font-base',(Math.min(22,Math.max(13,cur+d*2)))+'px');
+let currentFontScale = parseFloat(localStorage.getItem('vb_font_scale') || '1.0');
+
+function applyFontScale(scale){
+  currentFontScale = Math.min(1.35, Math.max(0.85, scale));
+  localStorage.setItem('vb_font_scale', currentFontScale.toString());
+  document.documentElement.style.fontSize = (16 * currentFontScale) + 'px';
+  document.documentElement.style.setProperty('--font-base', (17 * currentFontScale) + 'px');
+  toast(`Text size: ${Math.round(currentFontScale * 100)}%`);
 }
+
+function adjustFont(d){
+  if(d === 0) applyFontScale(1.0);
+  else if(d > 0) applyFontScale(currentFontScale + 0.1);
+  else if(d < 0) applyFontScale(currentFontScale - 0.1);
+}
+
+// Initialize font scale preference
+applyFontScale(currentFontScale);
 
 function setLang(l,btn){
   currentLang=l;
