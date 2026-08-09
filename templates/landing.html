@@ -542,11 +542,19 @@ resize();initStars();drawStars();
   const lctx = lc.getContext('2d');
 
   let W, H, CX, CY;
+  const stageWrapper = document.querySelector('.word-stage-wrapper');
   function resize(){
     W = lc.width = heroEl.offsetWidth;
     H = lc.height = heroEl.offsetHeight;
-    CX = W / 2;
-    CY = H / 2;
+    if (stageWrapper) {
+      const rect = stageWrapper.getBoundingClientRect();
+      const heroRect = heroEl.getBoundingClientRect();
+      CX = (rect.left - heroRect.left) + (rect.width / 2);
+      CY = (rect.top - heroRect.top) + (rect.height / 2);
+    } else {
+      CX = W / 2;
+      CY = H / 2;
+    }
   }
   resize(); window.addEventListener('resize', () => { resize(); reset(); });
 
@@ -554,7 +562,6 @@ resize();initStars();drawStars();
 
   function currentPair(){
     const p=PAIRS[pIdx%PAIRS.length];
-    // Alternate: even round → Hindi big; odd round → English big
     return round%2===0
       ? {big:p[0],small:p[1],bigIsHindi:true}
       : {big:p[1],small:p[0],bigIsHindi:false};
@@ -562,13 +569,14 @@ resize();initStars();drawStars();
 
   function makeParticles(){
     const pair=currentPair();
-    // Use letters from BOTH words in the pair for the orbiting pool
     const src=(pair.big+pair.small).split('');
     const pool=PAIRS.map(p=>p[0]+p[1]).join('').split('');
     while(src.length<10) src.push(pool[Math.floor(Math.random()*pool.length)]);
 
-    const orbitR=Math.min(W,H)*0.28;
-    const fsize =Math.min(W,H)*0.042;
+    const stageW = stageWrapper ? stageWrapper.offsetWidth : W;
+    const stageH = stageWrapper ? stageWrapper.offsetHeight : H;
+    const orbitR = Math.min(stageW, stageH) * 0.42;
+    const fsize  = Math.min(W, H) * (window.innerWidth <= 992 ? 0.048 : 0.042);
 
     return src.map((ch,i)=>{
       const ang =(i/src.length)*Math.PI*2+Math.random()*0.25;
